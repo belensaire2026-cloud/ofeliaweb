@@ -893,6 +893,16 @@ const PLURAL = {
 const catLabel = c => PLURAL[(c||'').toLowerCase().trim()] || (c||'');
 const catKey   = c => catLabel(c).toLowerCase();
 
+/* La estructura del menú es FIJA: siempre se ven estos materiales y,
+   dentro de cada uno, estos cuatro tipos de accesorio — aunque todavía
+   no haya ninguna pieza cargada. Las combinaciones sin nada quedan
+   marcadas como "no disponible".
+
+   Si en la planilla aparece un material o una categoría que no esté
+   en estas listas, se agrega solo al final.                          */
+const MATERIALES_FIJOS = ['Plata 925', 'Acero blanco'];
+const CATEGORIAS_FIJAS = ['anillos', 'collares', 'pulseras', 'aros'];
+
 /* Copia de respaldo: si la planilla no responde, la web usa esto. */
 const SNAPSHOT = [{"name": "Cubano N°0", "mat": "Plata 925", "cat": "Aros", "price": 6000, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°1", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°2", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°3", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°4", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cubic Mini Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Cuadrado", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Square Cubic", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Anillo: Medio Sin Fin", "mat": "Plata 925", "cat": "Anillo", "price": 20000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Circulo", "mat": "Plata 925", "cat": "Anillo", "price": 16000, "stock": 2, "ch": 1, "me": 1, "gr": 0}, {"name": "Gota", "mat": "Plata 925", "cat": "Anillo", "price": 23000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Anillo V", "mat": "Plata 925", "cat": "Anillo", "price": 12000, "stock": 1, "ch": 0, "me": 0, "gr": 1}, {"name": "Anillo calado", "mat": "Plata 925", "cat": "Anillo", "price": 19000, "stock": 2, "ch": 0, "me": 1, "gr": 1}, {"name": "Cadena eslabon", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cadena lisa", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollita gota colgante", "mat": "Acero blanco", "cat": "Aros", "price": 9000, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas bolitas circulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas bolitas triangulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas mitad similbrillo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas tenza buble", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 0, "ch": 0, "me": 0, "gr": 0}, {"name": "Argollitas click anchas", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas diseño chico", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas diseño ancho", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}];
 
@@ -984,9 +994,16 @@ async function cargar(){
   if(!list){ list = SNAPSHOT; fuente = 'respaldo'; }
   PRODUCTS = normalizar(list);
 
-  MATERIALS = [...new Set(PRODUCTS.map(p => p.mat))].sort((a,b)=>a.localeCompare(b,'es'));
+  /* Materiales: los fijos primero, después cualquier otro que aparezca
+     en la planilla. Si difieren solo en mayúsculas, manda la planilla. */
+  const matEnPlanilla = [...new Set(PRODUCTS.map(p => p.mat))];
+  const mismo = (a,b) => a.toLowerCase().trim() === b.toLowerCase().trim();
+  MATERIALS = MATERIALES_FIJOS.map(m => matEnPlanilla.find(d => mismo(d,m)) || m);
+  matEnPlanilla.forEach(m => { if(!MATERIALS.some(x => mismo(x,m))) MATERIALS.push(m); });
+
+  /* Categorías: las cuatro fijas siempre, más las que traiga la planilla. */
   const orden = ['anillos','collares','pulseras','aros','dijes'];
-  CATS = [...new Set(PRODUCTS.map(p => p.catk))]
+  CATS = [...new Set([...CATEGORIAS_FIJAS, ...PRODUCTS.map(p => p.catk)])]
           .sort((a,b) => (orden.indexOf(a)+1||99) - (orden.indexOf(b)+1||99));
 
   // si nadie está marcado como destacado, elige el de mayor stock de cada categoría
@@ -1128,8 +1145,9 @@ function catList(mat){
 }
 function materialBlock(mat){
   const m = JSON.stringify(mat).replace(/"/g,'&quot;');
+  const vacio = !PRODUCTS.some(p => p.mat === mat);
   return `<li>
-    <button class="menu-row" onclick="toggleSub(this)">${mat}<span class="chev"></span></button>
+    <button class="menu-row ${vacio?'vacio':''}" onclick="toggleSub(this)">${mat}${vacio?'<span class="tag">no disponible</span>':''}<span class="chev"></span></button>
     <div class="submenu"><ul>
       <li><button class="menu-row leaf" onclick="filterBy(${m},'all')" style="letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;opacity:.7;">Ver todo</button></li>
       ${catList(mat)}
@@ -1251,8 +1269,8 @@ function mensajeVacio(){
   else if(mat)        que = `piezas en ${mat.toLowerCase()}`;
   const msg = `Hola! Quería consultar por ${que}.`;
   return `<div class="no-results">
-    <p class="nr-titulo">Por ahora no hay ${que} disponibles.</p>
-    <p class="nr-sub">Reponemos seguido. Escribinos y te avisamos apenas entren.</p>
+    <p class="nr-titulo">Todavía no hay ${que} disponibles.</p>
+    <p class="nr-sub">Estamos sumando piezas todo el tiempo. Escribinos y te avisamos apenas entren.</p>
     <a class="nr-btn" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
   </div>`;
 }

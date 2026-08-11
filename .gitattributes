@@ -1,0 +1,7 @@
+# Normaliza los fines de linea: evita que el archivo entero figure como
+# modificado al pasar de Windows a GitHub.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

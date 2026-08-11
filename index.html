@@ -408,6 +408,198 @@
     color:var(--choco-soft); opacity:.7; margin-top:38px;
   }
 
+  /* ── Fotos en la tarjeta ─────────────────── */
+  .card-img{cursor:pointer; transition:filter .3s ease;}
+  .card-img.con-foto{background-color:var(--crema-light);}
+  .card-img video{
+    position:absolute; inset:0; z-index:0;
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .card-img .badge, .card-img .ver-fotos{z-index:2;}
+  .card-img .ph-texto{position:relative; z-index:1;}
+  .si-ph{position:relative; overflow:hidden;}
+  .si-ph video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .lb-marco video{
+    width:100%; height:100%; object-fit:cover; display:block;
+    animation:lbfade .5s ease both;
+  }
+  .lb-punto.video{border-radius:2px; width:12px;}
+  .card:hover .card-img{filter:brightness(1.04);}
+  .card.agotado:hover .card-img{filter:grayscale(.55) opacity(.62);}
+  .card-body h3{cursor:pointer;}
+  .card-body h3:hover{opacity:.65;}
+  .ver-fotos{
+    position:absolute; bottom:0; left:0; right:0;
+    background:linear-gradient(to top, rgba(51,28,20,.62), transparent);
+    color:var(--crema); text-align:center;
+    padding:22px 0 9px;
+    font-size:.56rem; letter-spacing:.2em; text-transform:uppercase;
+    opacity:0; transition:opacity .3s ease; pointer-events:none;
+  }
+  .card:hover .ver-fotos{opacity:1;}
+
+  /* ── Similares dentro de la tarjeta ──────── */
+  .similar-inline{
+    margin-top:14px; padding-top:13px;
+    border-top:1px solid var(--line);
+  }
+  .si-titulo{
+    font-size:.55rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--choco-soft); margin-bottom:9px;
+  }
+  .si-lista{display:flex; flex-direction:column; gap:7px;}
+  .si-item{
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:none; border:none; cursor:pointer; padding:3px;
+    text-align:left; font-family:'Lora',serif; color:var(--choco);
+    transition:background .22s ease;
+  }
+  .si-item:hover{background:var(--crema-light);}
+  .si-ph{
+    width:40px; height:40px; flex:none;
+    background:var(--crema); border:1px solid var(--line);
+  }
+  .si-txt{display:flex; flex-direction:column; line-height:1.35; min-width:0;}
+  .si-txt b{font-weight:500; font-size:.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .si-txt i{font-size:.68rem; color:var(--choco-soft);}
+  .si-txt em{font-style:normal; font-size:.74rem;}
+  .si-vacio{
+    font-size:.76rem; font-style:italic; color:var(--choco-soft); line-height:1.6;
+  }
+  .si-vacio a{border-bottom:1px solid var(--line);}
+
+  /* ── Vacío: no hay disponibles ───────────── */
+  .no-results{padding:44px 16px;}
+  .nr-titulo{
+    font-style:normal; font-size:1.06rem;
+    color:var(--choco); margin-bottom:7px;
+  }
+  .nr-sub{font-size:.88rem; margin-bottom:20px;}
+  .nr-btn{
+    display:inline-block; padding:11px 26px;
+    border:1px solid var(--choco); color:var(--choco);
+    font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    font-style:normal;
+    transition:background .28s, color .28s;
+  }
+  .nr-btn:hover{background:var(--choco); color:var(--crema);}
+
+  /* ── Menú: categorías sin piezas ─────────── */
+  .menu-row .tag{
+    font-size:.54rem; letter-spacing:.14em; text-transform:uppercase;
+    border:1px solid rgba(227,205,189,0.32);
+    padding:2px 7px; margin-left:9px; border-radius:20px;
+    opacity:.75; white-space:nowrap;
+  }
+  .menu-row.vacio{opacity:.42;}
+  .menu-row.vacio:hover{opacity:.62;}
+  .menu-row.sinstock{opacity:.68;}
+
+  /* ── Carrusel a pantalla completa ────────── */
+  .lb{
+    position:fixed; inset:0; z-index:420;
+    background:rgba(30,16,11,.94);
+    display:flex; align-items:center; justify-content:center;
+    padding:26px;
+    opacity:0; pointer-events:none; transition:opacity .32s ease;
+  }
+  .lb.open{opacity:1; pointer-events:auto;}
+  .lb-caja{
+    display:grid; grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);
+    gap:34px; align-items:center;
+    width:100%; max-width:1020px; max-height:100%;
+  }
+  .lb-visor{position:relative; user-select:none;}
+  .lb-marco{
+    position:relative; width:100%; aspect-ratio:1/1.12;
+    background:var(--crema-light); overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lb-marco img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    animation:lbfade .5s ease both;
+  }
+  @keyframes lbfade{from{opacity:0;} to{opacity:1;}}
+  .lb-cargando, .lb-sinfoto{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:24px;
+    font-style:italic; font-size:.9rem; color:var(--choco-soft);
+  }
+  .lb-flecha{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:46px; height:46px; z-index:3;
+    background:rgba(248,240,232,.9); border:none; cursor:pointer;
+    color:var(--choco); font-size:1.7rem; line-height:1;
+    font-family:'Lora',serif;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .25s ease, transform .25s ease;
+  }
+  .lb-flecha:hover{background:var(--crema); transform:translateY(-50%) scale(1.08);}
+  .lb-flecha.izq{left:-23px;}
+  .lb-flecha.der{right:-23px;}
+  .lb-puntos{
+    display:flex; justify-content:center; gap:8px; margin-top:16px;
+  }
+  .lb-punto{
+    width:7px; height:7px; border-radius:50%; cursor:pointer;
+    background:none; border:1px solid var(--crema); opacity:.45;
+    padding:0; transition:opacity .25s ease, background .25s ease;
+  }
+  .lb-punto.on{opacity:1; background:var(--crema);}
+  .lb-info{color:var(--crema); max-height:78vh; overflow-y:auto; padding-right:6px;}
+  .lb-info .label{color:var(--crema); opacity:.62; font-size:.6rem;}
+  .lb-info h3{font-size:1.75rem; font-weight:500; line-height:1.25; margin:7px 0 4px;}
+  .lb-info .material{font-style:italic; opacity:.72; font-size:.9rem;}
+  .lb-info .sizes{color:var(--crema); opacity:.8; margin-top:12px; font-size:.78rem;}
+  .lb-info .sizes b{color:var(--crema);}
+  .lb-precio{font-size:1.3rem; margin:20px 0 5px;}
+  .lb-stock{
+    font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
+    opacity:.72; margin-bottom:20px;
+  }
+  .lb-add{
+    width:100%; padding:14px;
+    background:var(--crema); border:1px solid var(--crema);
+    color:var(--choco); cursor:pointer;
+    font-family:'Lora',serif; font-size:.64rem;
+    letter-spacing:.22em; text-transform:uppercase;
+    transition:opacity .25s ease;
+  }
+  .lb-add:hover{opacity:.82;}
+  .lb-add:disabled{
+    background:none; color:var(--crema);
+    border-color:rgba(227,205,189,.4); opacity:.5; cursor:default;
+  }
+  .lb-close{
+    position:absolute; top:20px; right:24px; z-index:5;
+    background:none; border:none; cursor:pointer;
+    color:var(--crema); font-size:2.1rem; line-height:1;
+    opacity:.75; transition:opacity .25s ease;
+  }
+  .lb-close:hover{opacity:1;}
+  .lb .similar-inline{border-top-color:rgba(227,205,189,.28); margin-top:22px;}
+  .lb .si-titulo{color:var(--crema); opacity:.62;}
+  .lb .si-item{color:var(--crema);}
+  .lb .si-item:hover{background:rgba(227,205,189,.12);}
+  .lb .si-txt i{color:var(--crema); opacity:.66;}
+  .lb .si-ph{background:rgba(227,205,189,.16); border-color:rgba(227,205,189,.3);}
+  .lb .si-vacio{color:var(--crema); opacity:.7;}
+
+  @media(max-width:860px){
+    .lb{padding:0;}
+    .lb-caja{
+      grid-template-columns:1fr; gap:0;
+      align-content:start; overflow-y:auto; max-height:100vh;
+    }
+    .lb-visor{padding:56px 0 0;}
+    .lb-marco{aspect-ratio:1/1;}
+    .lb-flecha.izq{left:8px;}
+    .lb-flecha.der{right:8px;}
+    .lb-info{padding:24px 22px 40px; max-height:none;}
+    .lb-info h3{font-size:1.4rem;}
+  }
+
   /* ── Cuidado ─────────────────────────────── */
   .care-grid{
     max-width:780px; margin:0 auto;
@@ -472,7 +664,7 @@
     transform:translate(-50%, 100px);
     background:var(--choco); color:var(--crema);
     padding:13px 26px; font-size:.8rem; letter-spacing:.08em;
-    z-index:400; transition:transform .4s cubic-bezier(.5,1.5,.5,1);
+    z-index:460; transition:transform .4s cubic-bezier(.5,1.5,.5,1);
   }
   .toast.show{transform:translate(-50%,0);}
 </style>
@@ -551,6 +743,20 @@
   </div>
 </div>
 
+<!-- Carrusel de fotos a pantalla completa -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Fotos del producto">
+  <button class="lb-close" onclick="cerrarProducto()" aria-label="Cerrar">&times;</button>
+  <div class="lb-caja">
+    <div class="lb-visor" id="lbVisor">
+      <button class="lb-flecha izq" onclick="pasarFoto(-1)" aria-label="Foto anterior">&lsaquo;</button>
+      <div class="lb-marco" id="lbMarco"></div>
+      <button class="lb-flecha der" onclick="pasarFoto(1)" aria-label="Foto siguiente">&rsaquo;</button>
+      <div class="lb-puntos" id="lbPuntos"></div>
+    </div>
+    <div class="lb-info" id="lbInfo"></div>
+  </div>
+</div>
+
 <section id="cuidado">
   <div class="section-head">
     <span class="label">Recomendaciones</span>
@@ -623,10 +829,44 @@
 
 // Link CSV de la hoja "Web" de tu planilla de Google.
 // Archivo → Compartir → Publicar en la web → hoja "Web" → formato CSV.
-const SHEET_CSV = '';
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=1886371706&single=true&output=csv';
 
 const WHATSAPP = '5491162441206';       // 54 + 9 + número sin 0 ni 15
 const EMAIL    = 'belensaire2026@gmail.com';
+
+/* ── FOTOS ───────────────────────────────────────────────────────
+   Cada producto tiene su carpeta dentro de "fotos/". El nombre de
+   la carpeta es el del producto en minúscula, sin acentos y con
+   guiones, seguido del material. Ejemplo:
+
+       fotos/gota-plata-925/1.jpg
+       fotos/gota-plata-925/2.jpg
+       fotos/gota-plata-925/3.jpg
+
+   Los archivos se numeran 1, 2, 3... El 1 es el que se ve en la
+   galería. La web los encuentra solos: no hay que anotar nada en
+   ningún lado. Si un producto no tiene carpeta, muestra el color
+   del material como hasta ahora.
+
+   TAMBIÉN ACEPTA VIDEOS (.mp4). Podés mezclarlos con las fotos:
+
+       1.mp4   → el video se ve moviéndose ya en la galería
+       1.jpg   → en la galería se ve la foto, y si ponés 2.mp4
+                 el video aparece recién al abrir el producto
+
+   O sea: el video va en la galería solo si lo llamás 1. Poné
+   video únicamente en las piezas donde sume; el resto queda con
+   fotos y listo.
+
+   Ojo: el nombre del archivo va TODO EN MINÚSCULA (1.jpg, no 1.JPG).
+   Si en la planilla cargás un link en la columna Foto, ese link
+   gana sobre la carpeta.                                          */
+const FOTOS_DIR   = 'fotos/';
+const FOTO_EXTS   = ['jpg','jpeg','png','webp'];
+const VIDEO_EXTS  = ['mp4','webm'];
+const MEDIA_EXTS  = [...FOTO_EXTS, ...VIDEO_EXTS];
+const FOTOS_MAX   = 8;      // hasta cuántos archivos busca por producto
+const CARRUSEL_MS = 4500;   // cada cuánto pasa sola (milisegundos)
 
 /* Colores de muestra por material (mientras no haya foto).
    Si agregás un material nuevo en la planilla y no está acá,
@@ -654,7 +894,7 @@ const catLabel = c => PLURAL[(c||'').toLowerCase().trim()] || (c||'');
 const catKey   = c => catLabel(c).toLowerCase();
 
 /* Copia de respaldo: si la planilla no responde, la web usa esto. */
-const SNAPSHOT = [{"name": "Cubano N°0", "mat": "Plata 925", "cat": "Aros", "price": 6000, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°1", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°2", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°3", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°4", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cubic Mini Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Cuadrado", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Square Cubic", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Anillo: Medio Sin Fin", "mat": "Plata 925", "cat": "Anillo", "price": 20000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Circulo", "mat": "Plata 925", "cat": "Anillo", "price": 16000, "stock": 2, "ch": 1, "me": 1, "gr": 0}, {"name": "Gota", "mat": "Plata 925", "cat": "Anillo", "price": 23000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Anillo V", "mat": "Plata 925", "cat": "Anillo", "price": 12000, "stock": 1, "ch": 0, "me": 0, "gr": 1}, {"name": "Anillo calado", "mat": "Plata 925", "cat": "Anillo", "price": 20000, "stock": 2, "ch": 0, "me": 1, "gr": 1}, {"name": "Cadena eslabon", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cadena lisa", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollita gota colgante", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas bolitas circulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas bolitas triangulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas mitad similbrillo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas tenza buble", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 0, "ch": 0, "me": 0, "gr": 0}, {"name": "Argollitas click anchas", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas diseño chico", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas diseño ancho", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}];
+const SNAPSHOT = [{"name": "Cubano N°0", "mat": "Plata 925", "cat": "Aros", "price": 6000, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°1", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°2", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°3", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubano N°4", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cubic Mini Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Circulo", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Cubic Cuadrado", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Square Cubic", "mat": "Plata 925", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Anillo: Medio Sin Fin", "mat": "Plata 925", "cat": "Anillo", "price": 20000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Circulo", "mat": "Plata 925", "cat": "Anillo", "price": 16000, "stock": 2, "ch": 1, "me": 1, "gr": 0}, {"name": "Gota", "mat": "Plata 925", "cat": "Anillo", "price": 23000, "stock": 1, "ch": 0, "me": 1, "gr": 0}, {"name": "Anillo V", "mat": "Plata 925", "cat": "Anillo", "price": 12000, "stock": 1, "ch": 0, "me": 0, "gr": 1}, {"name": "Anillo calado", "mat": "Plata 925", "cat": "Anillo", "price": 19000, "stock": 2, "ch": 0, "me": 1, "gr": 1}, {"name": "Cadena eslabon", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Cadena lisa", "mat": "Acero blanco", "cat": "Collar", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollita gota colgante", "mat": "Acero blanco", "cat": "Aros", "price": 9000, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas bolitas circulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas bolitas triangulo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas mitad similbrillo", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas tenza buble", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 0, "ch": 0, "me": 0, "gr": 0}, {"name": "Argollitas click anchas", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 2, "ch": 2, "me": 0, "gr": 0}, {"name": "Argollitas diseño chico", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}, {"name": "Argollitas diseño ancho", "mat": "Acero blanco", "cat": "Aros", "price": 0, "stock": 1, "ch": 1, "me": 0, "gr": 0}];
 
 /* ═══════════════════════════════════════════════════════════════
    Estado
@@ -763,13 +1003,128 @@ async function cargar(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Fotos y videos — los busca solos en fotos/<producto>/1, 2, 3…
+   ═══════════════════════════════════════════════════════════════ */
+const _medioUno   = {};   // id → primer archivo (o null)
+const _medioTodos = {};   // id → lista completa
+
+const esVideo = url =>
+  VIDEO_EXTS.includes((url || '').split('?')[0].split('.').pop().toLowerCase());
+
+function existeImg(url){
+  return new Promise(res => {
+    const im = new Image();
+    im.onload  = () => res(true);
+    im.onerror = () => res(false);
+    im.src = url;
+  });
+}
+
+function existeVideo(url){
+  return new Promise(res => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => res(true);
+    v.onerror = () => res(false);
+    v.src = url;
+  });
+}
+
+const existeMedio = url => esVideo(url) ? existeVideo(url) : existeImg(url);
+
+/* El primero: el que se ve en la galería. Puede ser foto o video. */
+async function primerMedio(p){
+  if(p.foto) return {url:p.foto, video:esVideo(p.foto)};   // link de la planilla manda
+  if(_medioUno[p.id] !== undefined) return _medioUno[p.id];
+  for(const ext of MEDIA_EXTS){
+    const url = FOTOS_DIR + p.id + '/1.' + ext;
+    if(await existeMedio(url)){
+      const m = {url, video:esVideo(url)};
+      _medioUno[p.id] = m;
+      return m;
+    }
+  }
+  _medioUno[p.id] = null;
+  return null;
+}
+
+/* Todo lo que tenga la pieza: para el carrusel. */
+async function mediosDe(p){
+  if(_medioTodos[p.id]) return _medioTodos[p.id];
+  const lista = [];
+  const uno = await primerMedio(p);
+  if(uno) lista.push(uno);
+
+  const conocida = uno ? uno.url.split('.').pop().toLowerCase() : MEDIA_EXTS[0];
+  const orden = [conocida, ...MEDIA_EXTS.filter(e => e !== conocida)];
+
+  let fallos = 0;
+  for(let n = 2; n <= FOTOS_MAX && fallos < 2; n++){
+    let hallada = '';
+    for(const ext of orden){
+      const url = FOTOS_DIR + p.id + '/' + n + '.' + ext;
+      if(await existeMedio(url)){ hallada = url; break; }
+    }
+    if(hallada){ lista.push({url:hallada, video:esVideo(hallada)}); fallos = 0; }
+    else fallos++;
+  }
+  _medioTodos[p.id] = lista;
+  return lista;
+}
+
+/* Los videos de la galería solo corren mientras se ven en pantalla:
+   así no gastan datos de más ni recalientan el celular.            */
+const _mirador = ('IntersectionObserver' in window)
+  ? new IntersectionObserver(entradas => {
+      entradas.forEach(e => {
+        const v = e.target;
+        if(e.isIntersecting) v.play().catch(()=>{});
+        else v.pause();
+      });
+    }, {threshold:0.25})
+  : null;
+
+/* Rellena los huecos de la galería que estén en pantalla. */
+function pintarMedios(){
+  document.querySelectorAll('[data-foto]').forEach(async el => {
+    if(el.dataset.pintado) return;
+    el.dataset.pintado = '1';
+    const p = PRODUCTS.find(x => x.id === el.dataset.foto);
+    if(!p) return;
+    const m = await primerMedio(p);
+    if(!m) return;
+
+    if(m.video){
+      const v = document.createElement('video');
+      v.src = m.url;
+      v.muted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute('muted','');            // Safari lo pide como atributo
+      v.setAttribute('playsinline','');
+      v.preload = 'metadata';
+      el.prepend(v);
+      if(_mirador) _mirador.observe(v); else v.play().catch(()=>{});
+    } else {
+      el.style.background = `url('${m.url}') center/cover`;
+    }
+    el.classList.add('con-foto');
+    const t = el.querySelector('.ph-texto');
+    if(t) t.remove();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Menú lateral
    ═══════════════════════════════════════════════════════════════ */
 function catList(mat){
-  const cats = CATS.filter(c => PRODUCTS.some(p => p.mat===mat && p.catk===c));
-  return cats.map(c =>
-    `<li><button class="menu-row leaf" onclick="filterBy(${JSON.stringify(mat).replace(/"/g,'&quot;')},'${c}')">${catLabel(c)}</button></li>`
-  ).join('');
+  const m = JSON.stringify(mat).replace(/"/g,'&quot;');
+  return CATS.map(c => {
+    const enMat = PRODUCTS.filter(p => p.mat===mat && p.catk===c);
+    const hay   = enMat.some(p => p.stock > 0);
+    const clase = !enMat.length ? 'vacio' : (!hay ? 'sinstock' : '');
+    const tag   = !enMat.length ? '<span class="tag">no disponible</span>'
+                : (!hay        ? '<span class="tag">sin stock</span>' : '');
+    return `<li><button class="menu-row leaf ${clase}" onclick="filterBy(${m},'${c}')">${catLabel(c)}${tag}</button></li>`;
+  }).join('');
 }
 function materialBlock(mat){
   const m = JSON.stringify(mat).replace(/"/g,'&quot;');
@@ -837,28 +1192,69 @@ function talles(p){
   return `<div class="sizes">Talle: <b>${t.map(x=>x[0]).join(', ')}</b></div>`;
 }
 
+/* Bloque de piezas parecidas, siempre a la vista. */
+function similarInline(p){
+  const list = similares(p);
+  if(!list.length){
+    return `<div class="similar-inline">
+      <div class="si-titulo">Sin stock</div>
+      <div class="si-vacio">Por ahora no tenemos nada parecido disponible.
+        <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola! Quería consultar por ' + p.name + ' (' + p.mat + ')')}" target="_blank" rel="noopener">Escribinos</a> y la reponemos.</div>
+    </div>`;
+  }
+  return `<div class="similar-inline">
+    <div class="si-titulo">Parecidas y disponibles</div>
+    <div class="si-lista">
+      ${list.map(x => `
+        <button class="si-item" onclick="abrirProducto('${x.id}')">
+          <span class="si-ph" data-foto="${x.id}" style="background:${swatchOf(x.mat)}"></span>
+          <span class="si-txt">
+            <b>${x.name}</b>
+            <i>${x.mat}</i>
+            <em>${fmt(x.price)}</em>
+          </span>
+        </button>`).join('')}
+    </div>
+  </div>`;
+}
+
 function cardHTML(p){
   const agotado = p.stock <= 0;
   const ultimo  = !agotado && p.stock === 1;
-  const fondo = p.foto ? `background:url('${p.foto}') center/cover` : `background:${swatchOf(p.mat)}`;
   return `<article class="card ${agotado?'agotado':''}">
-    <div class="card-img" style="${fondo}">
-      ${p.foto ? '' : 'foto del producto'}
+    <div class="card-img" data-foto="${p.id}" style="background:${swatchOf(p.mat)}" onclick="abrirProducto('${p.id}')">
+      <span class="ph-texto">foto del producto</span>
       ${agotado ? '<span class="badge">Sin stock</span>' : ''}
       ${ultimo  ? '<span class="badge last">Última unidad</span>' : ''}
+      <span class="ver-fotos">Ver fotos</span>
     </div>
     <div class="card-body">
       <span class="label">${p.catn}</span>
-      <h3>${p.name}</h3>
+      <h3 onclick="abrirProducto('${p.id}')">${p.name}</h3>
       <div class="material">${p.mat}</div>
       ${talles(p)}
       <div class="price">${fmt(p.price)}</div>
       ${agotado
-        ? `<button class="add-btn" disabled>Sin stock</button>
-           <button class="similar-btn" onclick="verSimilares('${p.id}')">Ver piezas similares</button>`
+        ? `<button class="add-btn" disabled>Sin stock</button>${similarInline(p)}`
         : `<button class="add-btn" onclick="addToCart('${p.id}')">Agregar al carrito</button>`}
     </div>
   </article>`;
+}
+
+/* Mensaje cuando la combinación elegida no tiene nada. */
+function mensajeVacio(){
+  const mat = current.mat === 'all' ? '' : current.mat;
+  const cat = current.cat === 'all' ? '' : catLabel(current.cat).toLowerCase();
+  let que = 'piezas';
+  if(cat && mat)      que = `${cat} en ${mat.toLowerCase()}`;
+  else if(cat)        que = cat;
+  else if(mat)        que = `piezas en ${mat.toLowerCase()}`;
+  const msg = `Hola! Quería consultar por ${que}.`;
+  return `<div class="no-results">
+    <p class="nr-titulo">Por ahora no hay ${que} disponibles.</p>
+    <p class="nr-sub">Reponemos seguido. Escribinos y te avisamos apenas entren.</p>
+    <a class="nr-btn" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+  </div>`;
 }
 
 function renderGrid(){
@@ -886,7 +1282,9 @@ function renderGrid(){
 
   document.getElementById('grid').innerHTML = list.length
     ? list.map(cardHTML).join('')
-    : '<div class="no-results">No hay piezas en esta combinación todavía.</div>';
+    : mensajeVacio();
+
+  pintarMedios();
 
   document.getElementById('syncNote').textContent = fuente === 'planilla'
     ? 'Stock actualizado desde la planilla.'
@@ -933,6 +1331,139 @@ function verSimilares(id){
     </div>`).join('');
   document.getElementById('modal').classList.add('open');
 }
+/* ═══════════════════════════════════════════════════════════════
+   Carrusel de fotos a pantalla completa
+   ═══════════════════════════════════════════════════════════════ */
+let lbProd = null, lbFotos = [], lbIdx = 0, lbTimer = null;
+
+function lbInfoHTML(p){
+  const agotado = p.stock <= 0;
+  const ultimo  = !agotado && p.stock === 1;
+  const estado  = agotado ? 'Sin stock'
+                : (ultimo ? 'Última unidad'
+                : `${p.stock} disponibles`);
+  return `
+    <span class="label">${p.catn}</span>
+    <h3>${p.name}</h3>
+    <div class="material">${p.mat}</div>
+    ${talles(p)}
+    <div class="lb-precio">${fmt(p.price)}</div>
+    <div class="lb-stock">${estado}</div>
+    ${agotado
+      ? `<button class="lb-add" disabled>Sin stock</button>${similarInline(p)}`
+      : `<button class="lb-add" onclick="addToCart('${p.id}')">Agregar al carrito</button>`}`;
+}
+
+async function abrirProducto(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  if(!p) return;
+  lbProd = p; lbIdx = 0; lbFotos = [];
+  frenarAuto();
+
+  document.getElementById('lbInfo').innerHTML  = lbInfoHTML(p);
+  document.getElementById('lbPuntos').innerHTML = '';
+  document.getElementById('lbMarco').innerHTML =
+    '<div class="lb-cargando">buscando fotos…</div>';
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  pintarMedios();
+
+  const medios = await mediosDe(p);
+  if(lbProd !== p) return;              // cambió de producto mientras cargaba
+  lbFotos = medios;
+
+  if(!lbFotos.length){
+    document.getElementById('lbMarco').innerHTML =
+      `<div class="lb-sinfoto" style="background:${swatchOf(p.mat)}">
+         <span>Todavía no cargamos las fotos de esta pieza</span>
+       </div>`;
+    flechasVisibles(false);
+    return;
+  }
+  flechasVisibles(lbFotos.length > 1);
+  mostrarFoto(0);
+  lbFotos.slice(1).forEach(m => { if(!m.video){ const i = new Image(); i.src = m.url; } });
+  arrancarAuto();
+}
+
+function flechasVisibles(v){
+  document.querySelectorAll('.lb-flecha').forEach(b => b.style.display = v ? 'flex' : 'none');
+}
+
+function mostrarFoto(i){
+  if(!lbFotos.length) return;
+  lbIdx = (i + lbFotos.length) % lbFotos.length;
+  const m     = lbFotos[lbIdx];
+  const solo  = lbFotos.length === 1;
+  const marco = document.getElementById('lbMarco');
+  const alt   = lbProd ? lbProd.name : '';
+
+  if(m.video){
+    /* Si es el único archivo, va en loop. Si hay más, se reproduce
+       una vez y al terminar pasa al siguiente.                    */
+    marco.innerHTML =
+      `<video src="${m.url}" autoplay muted playsinline ${solo ? 'loop' : ''}></video>`;
+    const v = marco.querySelector('video');
+    v.play().catch(()=>{});
+    if(!solo) v.onended = () => pasarFoto(1, true);
+  } else {
+    marco.innerHTML = `<img src="${m.url}" alt="${alt}">`;
+  }
+
+  document.getElementById('lbPuntos').innerHTML = lbFotos.length > 1
+    ? lbFotos.map((x, n) =>
+        `<button class="lb-punto ${n===lbIdx?'on':''} ${x.video?'video':''}" onclick="irAFoto(${n})" aria-label="${x.video?'Video':'Foto'} ${n+1}"></button>`
+      ).join('')
+    : '';
+}
+
+function pasarFoto(d, sola){
+  if(!lbFotos.length) return;
+  mostrarFoto(lbIdx + d);
+  if(!sola) arrancarAuto();           // si la pasás vos, reinicia el reloj
+}
+function irAFoto(n){ mostrarFoto(n); arrancarAuto(); }
+
+function arrancarAuto(){
+  frenarAuto();
+  if(lbFotos.length < 2) return;
+  /* Si lo que se está viendo es un video, no corre el reloj: espera
+     a que el video termine y recién ahí pasa al siguiente.         */
+  if(lbFotos[lbIdx] && lbFotos[lbIdx].video) return;
+  lbTimer = setInterval(() => pasarFoto(1, true), CARRUSEL_MS);
+}
+function frenarAuto(){ if(lbTimer){ clearInterval(lbTimer); lbTimer = null; } }
+
+function cerrarProducto(){
+  frenarAuto();
+  lbProd = null; lbFotos = [];
+  document.getElementById('lb').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* Se frena sola si estás mirando una foto, y sigue cuando salís. */
+const _lbVisor = document.getElementById('lbVisor');
+_lbVisor.addEventListener('mouseenter', frenarAuto);
+_lbVisor.addEventListener('mouseleave', () => { if(lbProd) arrancarAuto(); });
+
+/* Fondo, teclado y deslizar con el dedo. */
+document.getElementById('lb').addEventListener('click', e => {
+  if(e.target.id === 'lb' || e.target.classList.contains('lb-caja')) cerrarProducto();
+});
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('lb').classList.contains('open')) return;
+  if(e.key === 'Escape')     cerrarProducto();
+  if(e.key === 'ArrowRight') pasarFoto(1);
+  if(e.key === 'ArrowLeft')  pasarFoto(-1);
+});
+let _tx = 0;
+_lbVisor.addEventListener('touchstart', e => { _tx = e.changedTouches[0].clientX; frenarAuto(); }, {passive:true});
+_lbVisor.addEventListener('touchend', e => {
+  const d = e.changedTouches[0].clientX - _tx;
+  if(Math.abs(d) > 45) pasarFoto(d < 0 ? 1 : -1);
+  else if(lbProd) arrancarAuto();
+}, {passive:true});
+
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', e => {
   if(e.target.id === 'modal') closeModal();

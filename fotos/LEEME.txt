@@ -1,0 +1,67 @@
+FOTOS Y VIDEOS DE LOS PRODUCTOS
+===============================
+
+Una carpeta por producto. Adentro los archivos numerados: 1, 2, 3...
+El numero 1 es el que se ve en la galeria; el resto arma el carrusel.
+
+FOTOS: .jpg .jpeg .png .webp
+VIDEOS: .mp4 .webm
+
+COMO DECIDIS SI UNA PIEZA MUESTRA VIDEO EN LA GALERIA
+-----------------------------------------------------
+  1.mp4 + 2.jpg + 3.jpg  ->  el video se ve moviendose ya en la galeria
+  1.jpg + 2.mp4 + 3.jpg  ->  en la galeria se ve la foto; el video
+                             aparece recien al abrir el producto
+  1.jpg + 2.jpg + 3.jpg  ->  sin video, como siempre
+
+Poné video solo en las piezas donde sume. No hace falta que todas tengan.
+
+COMO SE COMPORTAN LOS VIDEOS
+----------------------------
+  - Siempre mudos (los navegadores no dejan que arranque el sonido solo)
+  - En la galeria: arrancan solos y van en loop. Se pausan cuando la
+    tarjeta sale de la pantalla, para no gastar datos
+  - En el carrusel: se reproducen una vez y al terminar pasa al siguiente.
+    Si la pieza tiene un solo video, ese va en loop
+
+CONSEJOS
+--------
+  - Nombre del archivo TODO EN MINUSCULA: 1.jpg, no 1.JPG
+  - Videos cortos: 5 a 10 segundos, menos de 5 MB. Van adentro del
+    repositorio, asi que si pesan mucho todo se vuelve lento
+  - Usa .mp4. El .mov del iPhone no lo abren todos los navegadores:
+    convertilo a mp4 antes de subirlo
+  - Fotos cuadradas o verticales quedan mejor. Ideal 1200x1300 px
+  - Hasta 8 archivos por producto
+
+Si agregas un producto nuevo a la planilla, crea la carpeta con el mismo
+criterio: nombre del producto y material, en minuscula, sin acentos, con
+guiones. Si le cambias el nombre a un producto, renombra tambien la carpeta.
+
+CARPETAS ACTUALES
+-----------------
+
+  cubano-n-0-plata-925                         -> Cubano N°0 · Plata 925
+  cubano-n-1-plata-925                         -> Cubano N°1 · Plata 925
+  cubano-n-2-plata-925                         -> Cubano N°2 · Plata 925
+  cubano-n-3-plata-925                         -> Cubano N°3 · Plata 925
+  cubano-n-4-plata-925                         -> Cubano N°4 · Plata 925
+  cubic-mini-circulo-plata-925                 -> Cubic Mini Circulo · Plata 925
+  cubic-circulo-plata-925                      -> Cubic Circulo · Plata 925
+  cubic-cuadrado-plata-925                     -> Cubic Cuadrado · Plata 925
+  square-cubic-plata-925                       -> Square Cubic · Plata 925
+  anillo-medio-sin-fin-plata-925               -> Anillo: Medio Sin Fin · Plata 925
+  circulo-plata-925                            -> Circulo · Plata 925
+  gota-plata-925                               -> Gota · Plata 925
+  anillo-v-plata-925                           -> Anillo V · Plata 925
+  anillo-calado-plata-925                      -> Anillo calado · Plata 925
+  cadena-eslabon-acero-blanco                  -> Cadena eslabon · Acero blanco
+  cadena-lisa-acero-blanco                     -> Cadena lisa · Acero blanco
+  argollita-gota-colgante-acero-blanco         -> Argollita gota colgante · Acero blanco
+  argollitas-bolitas-circulo-acero-blanco      -> Argollitas bolitas circulo · Acero blanco
+  argollitas-bolitas-triangulo-acero-blanco    -> Argollitas bolitas triangulo · Acero blanco
+  argollitas-mitad-similbrillo-acero-blanco    -> Argollitas mitad similbrillo · Acero blanco
+  argollitas-tenza-buble-acero-blanco          -> Argollitas tenza buble · Acero blanco
+  argollitas-click-anchas-acero-blanco         -> Argollitas click anchas · Acero blanco
+  argollitas-diseno-chico-acero-blanco         -> Argollitas diseño chico · Acero blanco
+  argollitas-diseno-ancho-acero-blanco         -> Argollitas diseño ancho · Acero blanco

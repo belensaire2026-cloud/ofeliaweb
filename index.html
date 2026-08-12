@@ -578,6 +578,85 @@
     opacity:.75; transition:opacity .25s ease;
   }
   .lb-close:hover{opacity:1;}
+  /* ── Cuidado por material ────────────────── */
+  .cuidado-bloque{
+    padding:18px 0;
+    border-top:1px solid var(--line);
+  }
+  .cuidado-bloque:first-child{border-top:none; padding-top:4px;}
+  .cb-cabeza{display:flex; align-items:center; gap:11px; margin-bottom:9px;}
+  .cb-swatch{
+    width:26px; height:26px; flex:none; border-radius:50%;
+    border:1px solid var(--line);
+  }
+  .cb-cabeza h4{font-size:1.06rem; font-weight:500;}
+  .cb-cuenta{
+    margin-left:auto; font-size:.58rem;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--choco-soft); opacity:.7; white-space:nowrap;
+  }
+  .cuidado-bloque p{
+    font-size:.88rem; line-height:1.75; color:var(--choco-soft);
+    margin-bottom:11px;
+  }
+  .cuidado-bloque p:last-child{margin-bottom:0;}
+  .cb-sub{
+    font-size:.56rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--choco); opacity:.55; margin:16px 0 8px;
+  }
+  .cuidado-bloque.destacado{
+    background:var(--crema-light);
+    margin:0 -18px; padding:18px; border-radius:2px;
+  }
+  .cuidado-bloque.destacado:first-child{padding-top:18px;}
+  .cuidado-link{
+    display:block; margin:34px auto 0; padding:12px 28px;
+    background:none; border:1px solid var(--choco); color:var(--choco);
+    cursor:pointer; font-family:'Lora',serif;
+    font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    transition:background .28s, color .28s;
+  }
+  .cuidado-link:hover{background:var(--choco); color:var(--crema);}
+
+  /* ── Acordeón dentro de la pieza ─────────── */
+  .acordeon{margin-top:24px;}
+  .ac-cabeza{
+    display:flex; align-items:center; justify-content:space-between;
+    width:100%; padding:14px 0;
+    background:none; border:none; border-top:1px solid rgba(227,205,189,.28);
+    cursor:pointer; color:var(--crema); font-family:'Lora',serif;
+    font-size:.64rem; letter-spacing:.22em; text-transform:uppercase;
+    transition:opacity .25s ease;
+  }
+  .ac-cabeza:hover{opacity:.72;}
+  .ac-signo{
+    position:relative; width:11px; height:11px; flex:none;
+  }
+  .ac-signo::before, .ac-signo::after{
+    content:''; position:absolute; background:var(--crema);
+    top:50%; left:0; width:11px; height:1px; margin-top:-.5px;
+    transition:transform .3s ease;
+  }
+  .ac-signo::after{transform:rotate(90deg);}
+  .ac-cabeza.open .ac-signo::after{transform:rotate(0deg);}
+  .ac-cuerpo{
+    display:grid; grid-template-rows:0fr;
+    transition:grid-template-rows .35s cubic-bezier(.5,0,.2,1);
+  }
+  .ac-cuerpo.open{grid-template-rows:1fr;}
+  .ac-cuerpo > div{overflow:hidden;}
+  .ac-cuerpo p{
+    font-size:.85rem; line-height:1.75;
+    color:var(--crema); opacity:.78; padding-bottom:4px;
+  }
+  .ac-leermas{
+    background:none; border:none; cursor:pointer; padding:8px 0 14px;
+    color:var(--crema); font-family:'Lora',serif;
+    font-size:.78rem; font-style:italic;
+    border-bottom:1px solid rgba(227,205,189,.4);
+    transition:border-color .25s ease;
+  }
+  .ac-leermas:hover{border-bottom-color:var(--crema);}
   .lb .similar-inline{border-top-color:rgba(227,205,189,.28); margin-top:22px;}
   .lb .si-titulo{color:var(--crema); opacity:.62;}
   .lb .si-item{color:var(--crema);}
@@ -743,6 +822,16 @@
   </div>
 </div>
 
+<!-- Cuidado detallado, material por material -->
+<div class="modal" id="modalCuidado">
+  <div class="modal-box">
+    <button class="modal-close" onclick="cerrarCuidados()" aria-label="Cerrar">&times;</button>
+    <h3>Cuidado por material</h3>
+    <div class="sub">Cada material se comporta distinto. Así cuidás cada pieza según de qué está hecha.</div>
+    <div id="cuidadoGrid"></div>
+  </div>
+</div>
+
 <!-- Carrusel de fotos a pantalla completa -->
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Fotos del producto">
   <button class="lb-close" onclick="cerrarProducto()" aria-label="Cerrar">&times;</button>
@@ -785,6 +874,7 @@
       <p>Pasales un paño seco y suave después de cada uso.</p>
     </div>
   </div>
+  <button class="cuidado-link" onclick="abrirCuidados()">Ver cuidado por material</button>
 </section>
 
 <section id="contacto">
@@ -881,6 +971,147 @@ const SWATCHES = {
 };
 const SWATCH_DEFAULT = 'linear-gradient(140deg,#e6d5c4,#cdb09a)';
 const swatchOf = m => SWATCHES[(m||'').toLowerCase().trim()] || SWATCH_DEFAULT;
+
+/* Info de cada material. Cuatro textos por material:
+
+     material      → qué es, corto. Se despliega dentro de la pieza.
+     cuidado       → cómo cuidarla, corto. Se despliega dentro de la pieza.
+     materialLargo → la versión completa, para la pantalla del menú.
+     cuidadoLargo  → idem.
+
+   No hay que cargar nada en la planilla: sale del nombre del
+   material. Si aparece uno que no está acá, usa el genérico.     */
+const INFO_MATERIALES = {
+
+  'plata 925': {
+    material:
+      'Plata de ley: 92,5% de plata pura, y el resto otros metales que le dan firmeza. ' +
+      'Es plata de verdad, con su brillo y también con lo que le es propio: se oscurece con el tiempo.',
+    materialLargo:
+      'La plata 925, o plata de ley, es una aleación de 92,5% de plata pura con un 7,5% de otros ' +
+      'metales. La plata pura sola es demasiado blanda para una joya: se deforma. Esa pequeña ' +
+      'proporción de otros metales es la que le da la firmeza para poder usarse todos los días.\n\n' +
+      'Que se oscurezca con el tiempo no es un defecto ni significa que sea de mala calidad: es una ' +
+      'reacción natural de la plata con el aire y con la humedad de la piel. De hecho es una de las ' +
+      'formas de reconocer que una pieza es plata auténtica. Se saca y vuelve a quedar como nueva.',
+    cuidado:
+      'Se oscurece con el uso: es normal y sale con un paño de platería. Guardala seca, en su ' +
+      'bolsita, y evitá el agua, los perfumes y las cremas.',
+    cuidadoLargo:
+      'Guardala en su bolsita cerrada, en un lugar seco y sin luz directa. El aire es lo que la ' +
+      'oscurece, así que cuanto menos expuesta esté cuando no la usás, mejor se mantiene.\n\n' +
+      'Sacátela para bañarte, nadar y entrenar. Y acordate del orden: perfume, crema y desodorante ' +
+      'primero, la joya después.\n\n' +
+      'Si se oscureció, no la frotes con nada abrasivo. Un paño de platería la deja como nueva.',
+  },
+
+  'acero blanco': {
+    material:
+      'Acero con un terminado claro que le da ese blanco parejo, parecido a la plata pero sin el ' +
+      'mantenimiento. Ese terminado es una capa: con el uso se puede ir desgastando, así que se ' +
+      'cuida un poco más que un acero desnudo.',
+    materialLargo:
+      'El acero blanco es acero con un terminado claro aplicado encima, que es lo que le da ese ' +
+      'color blanco parejo tan parecido a la plata. Tiene una ventaja grande sobre la plata: no se ' +
+      'oscurece con el aire, así que no hay que estar limpiándola.\n\n' +
+      'Como el color viene de una capa y no del metal en sí, esa capa se puede ir desgastando con ' +
+      'el roce y la exposición constante al agua. No es algo que pase de un día para el otro, pero ' +
+      'sí es lo que define cómo cuidarla: cuanto menos la expongas, más años conserva el terminado.',
+    cuidado:
+      'Guardala en su bolsita o joyero. Sacátela para bañarte y para entrenar, y mantenela lejos de ' +
+      'perfumes y productos de limpieza.',
+    cuidadoLargo:
+      'Guardala siempre en su bolsita o en un joyero, seca y sin que roce otras piezas.\n\n' +
+      'Sacátela para bañarte y para hacer ejercicio. El agua constante y la transpiración son lo que ' +
+      'más desgasta el terminado, y es el punto donde más se nota la diferencia entre una pieza que ' +
+      'dura años y una que se opaca en unos meses.\n\n' +
+      'Lejos de perfumes, cremas y productos de limpieza. Para limpiarla alcanza con un paño suave y ' +
+      'seco: nada de líquidos ni de esponjas que rayen.',
+  },
+
+  'acero inoxidable': {
+    material:
+      'Acero inoxidable macizo, sin ninguna capa encima: el color es el del propio metal. ' +
+      'Por eso no se destiñe ni se pela, y no se pone verde ni te mancha la piel.',
+    materialLargo:
+      'El acero inoxidable es una aleación de acero con cromo, y es el cromo el que lo vuelve ' +
+      'resistente a la oxidación. A diferencia del acero blanco, acá el color no viene de un ' +
+      'terminado aplicado encima: es el color del metal mismo, en todo su espesor.\n\n' +
+      'Eso lo hace el más despreocupado de los materiales que trabajamos. No se destiñe ni se pela ' +
+      'porque no hay nada que se pueda desprender. No se pone verde, no mancha la piel y no se ' +
+      'oscurece como la plata.',
+    cuidado:
+      'Es el más resistente de todos. Aguanta la rutina sin problema; igual sacátela para la pileta ' +
+      'y el mar, y pasale un paño seco cada tanto.',
+    cuidadoLargo:
+      'Es el material que menos cuidado necesita. Podés usarlo a diario sin mayor preocupación: no ' +
+      'se destiñe, no se oxida y no cambia de color.\n\n' +
+      'Aun así, sacátela para la pileta y para el mar. El cloro y el agua salada, con exposición ' +
+      'prolongada, terminan opacando cualquier metal.\n\n' +
+      'Para limpiarla, un paño seco y suave cada tanto. Si quedó con crema o transpiración, agua ' +
+      'tibia con un poco de jabón neutro y secala bien antes de guardarla.',
+  },
+
+  'acero chapado en oro': {
+    material:
+      'Base de acero inoxidable con una capa de oro aplicada al vacío (PVD): el oro se vaporiza en ' +
+      'una cámara sellada y se deposita sobre la pieza. Queda mucho más parejo y resistente que un ' +
+      'baño de oro común.',
+    materialLargo:
+      'El chapado al vacío, o PVD, es un proceso bastante más sofisticado que el baño de oro ' +
+      'tradicional. En vez de sumergir la pieza en un baño químico, se la coloca en una cámara ' +
+      'sellada al vacío donde el oro se vaporiza y se va depositando sobre la superficie, capa ' +
+      'sobre capa.\n\n' +
+      'El resultado es un acabado más limpio, más uniforme y bastante más resistente a los rayones ' +
+      'y a la decoloración. Con uso regular y buen cuidado, estas piezas conservan el dorado durante ' +
+      'años. Además, esa capa funciona como barrera entre el metal y la piel, así que suele caer ' +
+      'bien incluso en pieles sensibles.',
+    cuidado:
+      'Con buen cuidado el dorado dura años. Perfume y crema siempre antes de ponértela, nunca ' +
+      'encima. Guardala seca y sola, sin rozar otras piezas.',
+    cuidadoLargo:
+      'Lo que cuida el dorado es evitar los químicos. Perfume, crema y desodorante siempre antes de ' +
+      'ponerte la pieza, nunca encima de ella.\n\n' +
+      'Guardala seca, en su bolsita, y sola: el roce con otras piezas es lo que más marca el ' +
+      'terminado. Sacátela para bañarte, para la pileta y para entrenar.\n\n' +
+      'Limpiala solo con un paño suave y seco. Nada de limpiametales ni de productos para plata: ' +
+      'son abrasivos y se llevan puesta la capa de oro.',
+  },
+};
+
+/* Sinónimos: distintos nombres, mismo material. */
+INFO_MATERIALES['acero dorado']         = INFO_MATERIALES['acero chapado en oro'];
+INFO_MATERIALES['acero inoxidable 304'] = INFO_MATERIALES['acero inoxidable'];
+INFO_MATERIALES['acero 304']            = INFO_MATERIALES['acero inoxidable'];
+
+const INFO_GENERAL = {
+  material:
+    'Una pieza pensada para durar, elegida a mano.',
+  materialLargo:
+    'Una pieza pensada para durar, elegida a mano.',
+  cuidado:
+    'Guardala en su bolsita, en un lugar seco. Evitá el agua, los perfumes y las cremas, y pasale ' +
+    'un paño suave después de usarla.',
+  cuidadoLargo:
+    'Guardala en su bolsita, en un lugar seco y lejos de la luz directa.\n\n' +
+    'Evitá el agua, los perfumes y las cremas: los químicos son lo que más opaca cualquier metal.\n\n' +
+    'Pasale un paño suave y seco después de usarla.',
+};
+
+function infoDe(mat){
+  const m = (mat||'').toLowerCase().trim();
+  if(INFO_MATERIALES[m]) return INFO_MATERIALES[m];
+  if(/plata/.test(m))    return INFO_MATERIALES['plata 925'];
+  if(/oro|dorad/.test(m))return INFO_MATERIALES['acero chapado en oro'];
+  /* Cualquier otro acero cae en el más cuidadoso: cuidar de más nunca
+     arruinó una pieza, cuidar de menos sí.                           */
+  if(/^acero/.test(m))   return INFO_MATERIALES['acero blanco'];
+  return INFO_GENERAL;
+}
+const cuidadoDe = mat => infoDe(mat).cuidado;
+
+/* Los saltos de línea del texto largo pasan a párrafos. */
+const enParrafos = t => (t||'').split('\n\n').map(x => `<p>${x}</p>`).join('');
 
 /* Singular de la planilla → plural para mostrar */
 const PLURAL = {
@@ -1176,7 +1407,7 @@ function renderMenu(){
         <li><button class="menu-row leaf" onclick="filterBy('all','all')" style="font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding-left:16px;opacity:.7;">Ver todo</button></li>
       </ul></div>
     </li>
-    <li><button class="menu-row leaf" onclick="goTo('cuidado')">Cuidado</button></li>
+    <li><button class="menu-row leaf" onclick="abrirCuidados()">Cuidado</button></li>
     <li><button class="menu-row leaf" onclick="goTo('contacto')">Contacto</button></li>`;
 }
 
@@ -1253,7 +1484,7 @@ function cardHTML(p){
       ${talles(p)}
       <div class="price">${fmt(p.price)}</div>
       ${agotado
-        ? `<button class="add-btn" disabled>Sin stock</button>${similarInline(p)}`
+        ? `<button class="add-btn" onclick="abrirProducto('${p.id}')">Ver producto</button>`
         : `<button class="add-btn" onclick="addToCart('${p.id}')">Agregar al carrito</button>`}
     </div>
   </article>`;
@@ -1368,8 +1599,21 @@ function lbInfoHTML(p){
     <div class="lb-precio">${fmt(p.price)}</div>
     <div class="lb-stock">${estado}</div>
     ${agotado
-      ? `<button class="lb-add" disabled>Sin stock</button>${similarInline(p)}`
-      : `<button class="lb-add" onclick="addToCart('${p.id}')">Agregar al carrito</button>`}`;
+      ? `<button class="lb-add" disabled>Sin stock</button>`
+      : `<button class="lb-add" onclick="addToCart('${p.id}')">Agregar al carrito</button>`}
+    <div class="acordeon">
+      <button class="ac-cabeza" onclick="toggleAc(this)">Material<span class="ac-signo"></span></button>
+      <div class="ac-cuerpo"><div>
+        <p>${infoDe(p.mat).material}</p>
+      </div></div>
+
+      <button class="ac-cabeza" onclick="toggleAc(this)">Cuidado<span class="ac-signo"></span></button>
+      <div class="ac-cuerpo"><div>
+        <p>${infoDe(p.mat).cuidado}</p>
+        <button class="ac-leermas" onclick="abrirCuidados('${p.mat.replace(/'/g,"\\'")}')">Leer más</button>
+      </div></div>
+    </div>
+    ${agotado ? similarInline(p) : ''}`;
 }
 
 async function abrirProducto(id){
@@ -1469,6 +1713,10 @@ document.getElementById('lb').addEventListener('click', e => {
   if(e.target.id === 'lb' || e.target.classList.contains('lb-caja')) cerrarProducto();
 });
 document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if(document.getElementById('modalCuidado').classList.contains('open')) cerrarCuidados();
+    if(document.getElementById('modal').classList.contains('open')) closeModal();
+  }
   if(!document.getElementById('lb').classList.contains('open')) return;
   if(e.key === 'Escape')     cerrarProducto();
   if(e.key === 'ArrowRight') pasarFoto(1);
@@ -1481,6 +1729,47 @@ _lbVisor.addEventListener('touchend', e => {
   if(Math.abs(d) > 45) pasarFoto(d < 0 ? 1 : -1);
   else if(lbProd) arrancarAuto();
 }, {passive:true});
+
+/* ═══════════════════════════════════════════════════════════════
+   Cuidado por material
+   ═══════════════════════════════════════════════════════════════ */
+/* Si viene un material, abre resaltando ese. Si no, muestra todos. */
+function abrirCuidados(destacar){
+  closeAll();
+  cerrarProducto();
+  const lista = MATERIALS.slice().sort((a,b) =>
+    (b === destacar) - (a === destacar));          // el elegido, primero
+
+  document.getElementById('cuidadoGrid').innerHTML = lista.map(m => {
+    const i = infoDe(m);
+    const piezas = PRODUCTS.filter(p => p.mat === m).length;
+    return `<div class="cuidado-bloque ${m===destacar?'destacado':''}">
+      <div class="cb-cabeza">
+        <span class="cb-swatch" style="background:${swatchOf(m)}"></span>
+        <h4>${m}</h4>
+        ${piezas ? `<span class="cb-cuenta">${piezas} ${piezas===1?'pieza':'piezas'}</span>` : ''}
+      </div>
+      <div class="cb-sub">El material</div>
+      ${enParrafos(i.materialLargo)}
+      <div class="cb-sub">Cómo cuidarla</div>
+      ${enParrafos(i.cuidadoLargo)}
+    </div>`;
+  }).join('');
+  document.getElementById('modalCuidado').classList.add('open');
+}
+
+/* Abre y cierra un título del acordeón. */
+function toggleAc(btn){
+  const cuerpo = btn.nextElementSibling;
+  const abierto = cuerpo.classList.contains('open');
+  btn.parentElement.querySelectorAll('.ac-cuerpo').forEach(c => c.classList.remove('open'));
+  btn.parentElement.querySelectorAll('.ac-cabeza').forEach(b => b.classList.remove('open'));
+  if(!abierto){ cuerpo.classList.add('open'); btn.classList.add('open'); }
+}
+function cerrarCuidados(){ document.getElementById('modalCuidado').classList.remove('open'); }
+document.getElementById('modalCuidado').addEventListener('click', e => {
+  if(e.target.id === 'modalCuidado') cerrarCuidados();
+});
 
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', e => {

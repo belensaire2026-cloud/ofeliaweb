@@ -575,18 +575,18 @@
   }
   .talles-fila{display:flex; gap:9px; flex-wrap:wrap;}
   .talle-btn{
-    flex:1; min-width:88px; padding:13px 8px;
+    flex:1; min-width:92px; padding:15px 10px;
     background:none; border:1px solid rgba(227,205,189,.42);
     color:var(--crema); cursor:pointer;
-    font-family:'Lora',serif; font-size:.72rem;
-    letter-spacing:.1em;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-family:'Lora',serif; font-size:1rem;
+    letter-spacing:.04em; text-align:center;
     transition:background .25s, border-color .25s, color .25s;
   }
   .talle-btn:hover{border-color:var(--crema);}
   .talle-btn.on{background:var(--crema); border-color:var(--crema); color:var(--choco);}
-  .talle-ultima{
-    font-size:.5rem; letter-spacing:.14em; text-transform:uppercase; opacity:.7;
+  .talles-nota{
+    margin-top:10px; font-size:.78rem; font-style:italic;
+    color:var(--crema); opacity:.68;
   }
   .lb-add.pide-talle{
     animation:sacudir .4s ease;
@@ -1060,8 +1060,8 @@ const INFO_MATERIALES = {
 
   'plata 925': {
     material:
-      'Plata de ley: 92,5% de plata pura, y el resto otros metales que le dan firmeza. ' +
-      'Es plata de verdad, con su brillo y también con lo que le es propio: se oscurece con el tiempo.',
+      'Plata de ley: 92,5% de plata pura. Es plata de verdad, con su brillo y con lo que le es ' +
+      'propio: puede oscurecerse con el tiempo, y se recupera.',
     materialLargo:
       'La plata 925, o plata de ley, es una aleación de 92,5% de plata pura con un 7,5% de otros ' +
       'metales. La plata pura sola es demasiado blanda para una joya: se deforma. Esa pequeña ' +
@@ -1085,33 +1085,33 @@ const INFO_MATERIALES = {
 
   'acero blanco': {
     material:
-      'Acero con un terminado claro que le da ese blanco parejo, parecido a la plata pero sin el ' +
-      'mantenimiento. Ese terminado es una capa: con el uso se puede ir desgastando, así que se ' +
-      'cuida un poco más que un acero desnudo.',
+      'Acero quirúrgico con un baño que le da ese blanco parejo, parecido a la plata pero sin el ' +
+      'mantenimiento. Como el color viene del baño, conviene cuidarlo.',
     materialLargo:
-      'El acero blanco es acero con un terminado claro aplicado encima, que es lo que le da ese ' +
-      'color blanco parejo tan parecido a la plata. Tiene una ventaja grande sobre la plata: no se ' +
-      'oscurece con el aire, así que no hay que estar limpiándola.\n\n' +
-      'Como el color viene de una capa y no del metal en sí, esa capa se puede ir desgastando con ' +
-      'el roce y la exposición constante al agua. No es algo que pase de un día para el otro, pero ' +
-      'sí es lo que define cómo cuidarla: cuanto menos la expongas, más años conserva el terminado.',
+      'El acero blanco es acero quirúrgico con un baño aplicado encima, que es lo que le da ese ' +
+      'color blanco parejo tan parecido a la plata. La base es la misma que se usa en instrumental ' +
+      'médico: resistente y pensada para estar en contacto con la piel.\n\n' +
+      'Tiene una ventaja grande sobre la plata: no se oscurece con el aire, así que no hay que ' +
+      'estar limpiándola. Y como el color viene del baño y no del metal en sí, cuidarlo de los ' +
+      'productos abrasivos es lo que hace que conserve el tono durante años.',
     cuidado:
-      'Te recomendamos no usarla para entrenar y mantenerla lejos de productos químicos como ' +
-      'perfumes y cremas, para que conserve el color.',
+      'Te recomendamos no usarla para entrenar y mantenerla lejos de productos abrasivos como ' +
+      'perfumes, cremas y productos de limpieza, para que conserve el color.',
     cuidadoLargo:
-      'Lo que mejor conserva el color es evitar dos cosas: la transpiración y los químicos.\n\n' +
-      'Por eso te recomendamos no usarla para entrenar. La transpiración, de forma sostenida, es ' +
-      'lo que más desgasta el terminado.\n\n' +
+      'Lo que mejor conserva el color es evitar dos cosas: los productos abrasivos y la ' +
+      'transpiración.\n\n' +
       'Mantenela lejos de perfumes, cremas y productos de limpieza. Perfumate y ponete la crema ' +
       'primero, la pieza después.\n\n' +
+      'Te recomendamos también no usarla para entrenar: la transpiración, de forma sostenida, ' +
+      'desgasta el baño.\n\n' +
       'Guardala en su bolsita o en un joyero, seca y sin que roce otras piezas. Para limpiarla, ' +
       'un paño suave y seco: nada de líquidos ni de esponjas que rayen.',
   },
 
   'acero inoxidable': {
     material:
-      'Acero inoxidable macizo, sin ninguna capa encima: el color es el del propio metal. ' +
-      'Por eso no se destiñe ni se pela, y no se pone verde ni te mancha la piel.',
+      'Acero inoxidable macizo, sin baño: el color es el del propio metal. Por eso no se destiñe ' +
+      'ni se pela, y no te mancha la piel.',
     materialLargo:
       'El acero inoxidable es una aleación de acero con cromo, y es el cromo el que lo vuelve ' +
       'resistente a la oxidación. A diferencia del acero blanco, acá el color no viene de un ' +
@@ -1133,9 +1133,8 @@ const INFO_MATERIALES = {
 
   'acero chapado en oro': {
     material:
-      'Base de acero inoxidable con una capa de oro aplicada al vacío (PVD): el oro se vaporiza en ' +
-      'una cámara sellada y se deposita sobre la pieza. Queda mucho más parejo y resistente que un ' +
-      'baño de oro común.',
+      'Acero inoxidable con una capa de oro aplicada al vacío (PVD), mucho más pareja y resistente ' +
+      'que un baño de oro común.',
     materialLargo:
       'El chapado al vacío, o PVD, es un proceso bastante más sofisticado que el baño de oro ' +
       'tradicional. En vez de sumergir la pieza en un baño químico, se la coloca en una cámara ' +
@@ -1673,15 +1672,20 @@ function selectorTalle(p){
   if(opciones.length <= 1){
     return `<button class="lb-add" onclick="addToCart('${p.id}')">Agregar al carrito</button>`;
   }
+  const unicas = opciones.filter(t => t.stock === 1).map(t => t.nombre);
+  const nota = !unicas.length ? ''
+    : `<div class="talles-nota">Queda una sola en talle ${
+        unicas.length === 1 ? unicas[0]
+        : unicas.slice(0,-1).join(', ') + ' y ' + unicas.slice(-1)}.</div>`;
+
   return `
     <div class="talles">
       <div class="talles-tit">Elegí tu talle</div>
       <div class="talles-fila">
         ${opciones.map(t => `
-          <button class="talle-btn" data-talle="${t.nombre}" onclick="elegirTalle(this,'${t.nombre}')">
-            ${t.nombre}${t.stock === 1 ? '<span class="talle-ultima">última</span>' : ''}
-          </button>`).join('')}
+          <button class="talle-btn" data-talle="${t.nombre}" onclick="elegirTalle(this,'${t.nombre}')">${t.nombre}</button>`).join('')}
       </div>
+      ${nota}
     </div>
     <button class="lb-add" id="lbAdd" onclick="agregarConTalle('${p.id}')">Agregar al carrito</button>`;
 }
@@ -1708,8 +1712,7 @@ function lbInfoHTML(p){
   const agotado = p.stock <= 0;
   const ultimo  = !agotado && p.stock === 1;
   const estado  = agotado ? 'Sin stock'
-                : (ultimo ? 'Última unidad'
-                : `${p.stock} disponibles`);
+                : (ultimo ? 'Última unidad' : 'Disponible');
   return `
     <span class="label">${p.catn}</span>
     <h3>${p.name}</h3>

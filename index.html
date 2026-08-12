@@ -655,10 +655,11 @@
 
   /* ── Cuidado por material ────────────────── */
   .cuidado-bloque{
-    padding:18px 0;
+    padding:46px 0 40px;
     border-top:1px solid var(--line);
   }
-  .cuidado-bloque:first-child{border-top:none; padding-top:4px;}
+  .cuidado-bloque:first-child{border-top:none; padding-top:10px;}
+  .cuidado-bloque:last-child{padding-bottom:10px;}
   .cb-cabeza{margin-bottom:9px;}
   .cb-cabeza h4{font-size:1.24rem; font-weight:500;}
   .cuidado-bloque p{
@@ -671,8 +672,8 @@
     color:var(--choco); opacity:.55; margin:16px 0 8px;
   }
   .ac-mat{
-    font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
-    color:var(--crema); opacity:.95; margin-bottom:8px;
+    font-size:.62rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--crema); opacity:1; margin-right:2px;
   }
   .cuidado-link{
     display:block; margin:34px auto 0; padding:12px 28px;
@@ -743,8 +744,33 @@
     color:var(--crema); font-size:.64rem; opacity:.9; line-height:1.5;
   }
   .gt-celda b{display:block; font-weight:500; font-size:.76rem; opacity:1;}
-  .gt-ayuda{font-size:.8rem !important; opacity:.65 !important; padding-top:6px;}
-  .gt-ayuda a{border-bottom:1px solid rgba(227,205,189,.45);}
+  /* La misma guía, pero sobre la pantalla clara */
+  .pantalla .gt-dibujo{
+    color:var(--choco); max-width:520px; margin:8px 0 10px;
+  }
+  .pantalla .gt-dibujo svg{width:100%; height:auto; display:block;}
+  .pantalla .gt-fila{
+    color:var(--choco);
+    border-top:1px solid var(--line);
+    padding:15px 0;
+  }
+  .pantalla .gt-nombre{font-size:1.12rem;}
+  .pantalla .gt-nums{opacity:.62; font-size:.76rem;}
+  .pantalla .gt-mm{opacity:1; font-size:.98rem;}
+  .pantalla .gt-tabla{
+    background:var(--line); border-color:var(--line);
+    max-width:760px;
+  }
+  .pantalla .gt-celda{
+    background:var(--crema-pale); color:var(--choco);
+    padding:11px 4px; font-size:.72rem;
+  }
+  .pantalla .gt-celda b{font-size:.86rem;}
+  .gt-pie{
+    margin-top:26px; font-size:.92rem; font-style:italic;
+    color:var(--choco-soft);
+  }
+  .gt-pie a{border-bottom:1px solid var(--line);}
 
   .ac-leermas{
     background:none; border:none; cursor:pointer; padding:8px 0 14px;
@@ -916,6 +942,62 @@
     <h3 id="modalTitle"></h3>
     <div class="sub" id="modalSub"></div>
     <div class="mini-grid" id="modalGrid"></div>
+  </div>
+</div>
+
+<!-- Pantalla completa de guía de talles -->
+<div class="pantalla" id="pantallaTalles">
+  <div class="pantalla-inner">
+    <button class="pantalla-close" onclick="cerrarTalles()" aria-label="Cerrar">&times;</button>
+    <span class="label">Anillos</span>
+    <h2>Guía de talles</h2>
+    <p class="pantalla-sub">
+      Medí el diámetro interno de un anillo que ya uses y te quede cómodo,
+      y compará esos milímetros con la tabla.
+    </p>
+
+    <div class="gt-dibujo">
+      <svg viewBox="0 0 460 200" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Un anillo apoyado sobre una regla, midiendo su diámetro interno">
+        <!-- regla -->
+        <rect x="20" y="104" width="420" height="44" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <g stroke="currentColor" stroke-width="1.2" opacity=".75">
+          <line x1="40"  y1="104" x2="40"  y2="124"/><line x1="60"  y1="104" x2="60"  y2="116"/>
+          <line x1="80"  y1="104" x2="80"  y2="116"/><line x1="100" y1="104" x2="100" y2="116"/>
+          <line x1="120" y1="104" x2="120" y2="124"/><line x1="140" y1="104" x2="140" y2="116"/>
+          <line x1="160" y1="104" x2="160" y2="116"/><line x1="180" y1="104" x2="180" y2="116"/>
+          <line x1="200" y1="104" x2="200" y2="124"/><line x1="220" y1="104" x2="220" y2="116"/>
+          <line x1="240" y1="104" x2="240" y2="116"/><line x1="260" y1="104" x2="260" y2="116"/>
+          <line x1="280" y1="104" x2="280" y2="124"/><line x1="300" y1="104" x2="300" y2="116"/>
+          <line x1="320" y1="104" x2="320" y2="116"/><line x1="340" y1="104" x2="340" y2="116"/>
+          <line x1="360" y1="104" x2="360" y2="124"/><line x1="380" y1="104" x2="380" y2="116"/>
+          <line x1="400" y1="104" x2="400" y2="116"/><line x1="420" y1="104" x2="420" y2="116"/>
+        </g>
+        <!-- anillo apoyado sobre la regla -->
+        <circle cx="230" cy="104" r="62" fill="none" stroke="currentColor" stroke-width="11" opacity=".92"/>
+        <circle cx="230" cy="104" r="62" fill="none" stroke="var(--crema-pale)" stroke-width="2.4" opacity=".5"/>
+        <!-- marcas del diámetro interno -->
+        <g stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4">
+          <line x1="174" y1="26" x2="174" y2="170"/>
+          <line x1="286" y1="26" x2="286" y2="170"/>
+        </g>
+        <!-- cota -->
+        <line x1="174" y1="186" x2="286" y2="186" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M174 186 l8 -4 v8 z M286 186 l-8 -4 v8 z" fill="currentColor"/>
+        <text x="230" y="16" text-anchor="middle" font-family="Lora, serif"
+              font-size="13" fill="currentColor" opacity=".8">diámetro interno</text>
+      </svg>
+    </div>
+
+    <h3 class="pantalla-h3">Nuestros talles</h3>
+    <div id="tallesGrupos"></div>
+    <h3 class="pantalla-h3">Tabla completa</h3>
+    <div id="tallesTabla"></div>
+    <p class="gt-pie">
+      ¿No estás segura?
+      <a href="https://wa.me/5491162441206?text=Hola!%20Necesito%20ayuda%20para%20saber%20mi%20talle%20de%20anillo." target="_blank" rel="noopener">Escribinos</a>
+      y te ayudamos a encontrar tu talle.
+    </p>
   </div>
 </div>
 
@@ -1641,11 +1723,11 @@ function renderGrid(){
 
 function filterBy(mat, cat){
   current = {mat, cat};
-  renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarProducto();
+  renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarTalles(); cerrarProducto();
   document.getElementById('producto').scrollIntoView({behavior:'smooth'});
 }
 function goTo(id){
-  closeAll(); cerrarCuidados(); cerrarProducto();
+  closeAll(); cerrarCuidados(); cerrarTalles(); cerrarProducto();
   document.getElementById(id).scrollIntoView({behavior:'smooth'});
 }
 
@@ -1705,36 +1787,44 @@ const GRUPOS_TALLE = [
 ];
 const mm = n => n.toFixed(1).replace('.', ',') + ' mm';
 
-function guiaTalles(p){
-  if(p.catk !== 'anillos') return '';
-  const hay = tallesDe(p).map(t => t.nombre);
-
-  const filas = GRUPOS_TALLE.map(g => {
+/* Las tres opciones con sus milímetros. Si le pasás los talles que
+   tiene una pieza, los que no están quedan grisados.              */
+function filasTalles(hay){
+  return GRUPOS_TALLE.map(g => {
     const nums = TABLA_TALLES.filter(([n]) => n >= g.desde && n <= g.hasta);
     const desdeMM = nums[0][1], hastaMM = nums[nums.length-1][1];
-    const disponible = hay.includes(g.nombre);
-    return `<div class="gt-fila ${disponible?'':'gt-no'}">
+    const gris = hay && !hay.includes(g.nombre);
+    return `<div class="gt-fila ${gris?'gt-no':''}">
       <span class="gt-nombre">${g.nombre}</span>
       <span class="gt-nums">N°${g.desde} ${g.hasta===25?'en adelante':'a N°'+g.hasta}</span>
       <span class="gt-mm">${mm(desdeMM)} – ${mm(hastaMM)}</span>
     </div>`;
   }).join('');
+}
 
-  const tabla = TABLA_TALLES.map(([n,d]) =>
-    `<div class="gt-celda"><b>N°${n}</b>${mm(d)}</div>`).join('');
-
+/* Dentro de la pieza: solo las tres opciones y el acceso a la pantalla. */
+function guiaTalles(p){
+  if(p.catk !== 'anillos') return '';
   return `
     <button class="ac-cabeza" onclick="toggleAc(this)">Guía de talles<span class="ac-signo"></span></button>
     <div class="ac-cuerpo"><div>
-      <p>Medí el diámetro interno de un anillo que ya uses y te quede cómodo, y buscá esos
-         milímetros en la tabla.</p>
-      <div class="gt-grupos">${filas}</div>
-      <div class="gt-tabla">${tabla}</div>
-      <p class="gt-ayuda">¿No estás segura?
-        <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola! Necesito ayuda para saber mi talle de anillo.')}" target="_blank" rel="noopener">Escribinos</a>
-        y te ayudamos.</p>
+      <div class="gt-grupos">${filasTalles(tallesDe(p).map(t => t.nombre))}</div>
+      <button class="ac-leermas" onclick="abrirTalles()">Ver más información</button>
     </div></div>`;
 }
+
+/* Pantalla completa: el dibujo, las tres opciones y la tabla entera. */
+function abrirTalles(){
+  closeAll(); cerrarProducto(); cerrarCuidados();
+  document.getElementById('tallesGrupos').innerHTML = filasTalles(null);
+  document.getElementById('tallesTabla').innerHTML =
+    `<div class="gt-tabla">${TABLA_TALLES.map(([n,d]) =>
+      `<div class="gt-celda"><b>N°${n}</b>${mm(d)}</div>`).join('')}</div>`;
+  const pant = document.getElementById('pantallaTalles');
+  pant.classList.add('open');
+  pant.scrollTop = 0;
+}
+function cerrarTalles(){ document.getElementById('pantallaTalles').classList.remove('open'); }
 
 let lbTalle = null;    // talle elegido en la pieza que está abierta
 
@@ -1797,8 +1887,7 @@ function lbInfoHTML(p){
       ${guiaTalles(p)}
       <button class="ac-cabeza" onclick="toggleAc(this)">Material<span class="ac-signo"></span></button>
       <div class="ac-cuerpo"><div>
-        <div class="ac-mat">${p.mat}</div>
-        <p>${infoDe(p.mat).material}</p>
+        <p><span class="ac-mat">${p.mat}</span> · ${infoDe(p.mat).material}</p>
       </div></div>
 
       <button class="ac-cabeza" onclick="toggleAc(this)">Cuidado<span class="ac-signo"></span></button>
@@ -1909,6 +1998,7 @@ document.getElementById('lb').addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
     if(document.getElementById('pantallaCuidado').classList.contains('open')) cerrarCuidados();
+    if(document.getElementById('pantallaTalles').classList.contains('open')) cerrarTalles();
     if(document.getElementById('modal').classList.contains('open')) closeModal();
   }
   if(!document.getElementById('lb').classList.contains('open')) return;
@@ -1938,6 +2028,7 @@ const CONSEJOS_GENERALES = [
 function abrirCuidados(){
   closeAll();
   cerrarProducto();
+  cerrarTalles();
 
   document.getElementById('cuidadoGeneral').innerHTML = CONSEJOS_GENERALES.map(
     ([n, t, d]) => `<div class="care-item">

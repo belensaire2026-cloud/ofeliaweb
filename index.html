@@ -212,13 +212,18 @@
   .cart-total{display:flex; justify-content:space-between; margin-bottom:18px; font-weight:600;}
 
   /* ── Botones ─────────────────────────────── */
+  /* Bordes apenas redondeados y letra un poco más grande en todos. */
+  .btn, .add-btn, .lb-add, .nr-btn, .cuidado-link,
+  .talle-btn, .mini .b button, .similar-btn{
+    border-radius:5px;
+  }
   .btn{
     display:inline-block; cursor:pointer;
     padding:15px 38px;
     background:var(--choco); color:var(--crema);
     border:1px solid var(--choco);
     font-family:'Lora', serif;
-    font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase;
+    font-size:0.8rem; letter-spacing:0.2em; text-transform:uppercase;
     transition:background .3s, color .3s, transform .3s;
   }
   .btn:hover{background:transparent; color:var(--choco); transform:translateY(-2px);}
@@ -286,7 +291,7 @@
     border:1px solid var(--line);
     padding:8px 18px; border-radius:40px;
     font-family:'Lora',serif; color:var(--choco-soft);
-    font-size:.68rem; letter-spacing:.16em; text-transform:uppercase;
+    font-size:.76rem; letter-spacing:.16em; text-transform:uppercase;
     transition:background .25s, color .25s, border-color .25s;
   }
   .chip:hover{border-color:var(--choco);}
@@ -327,7 +332,7 @@
     padding:11px; width:100%;
     background:none; border:1px solid var(--choco);
     color:var(--choco); cursor:pointer;
-    font-family:'Lora',serif; font-size:.62rem;
+    font-family:'Lora',serif; font-size:.72rem;
     letter-spacing:.2em; text-transform:uppercase;
     transition:background .28s, color .28s;
   }
@@ -397,7 +402,7 @@
   .mini .b button{
     width:100%; padding:8px; cursor:pointer;
     background:none; border:1px solid var(--choco); color:var(--choco);
-    font-family:'Lora',serif; font-size:.56rem;
+    font-family:'Lora',serif; font-size:.66rem;
     letter-spacing:.16em; text-transform:uppercase;
     transition:background .25s, color .25s;
   }
@@ -478,7 +483,7 @@
   .nr-btn{
     display:inline-block; padding:11px 26px;
     border:1px solid var(--choco); color:var(--choco);
-    font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
     font-style:normal;
     transition:background .28s, color .28s;
   }
@@ -562,7 +567,7 @@
     width:100%; padding:14px;
     background:var(--crema); border:1px solid var(--crema);
     color:var(--choco); cursor:pointer;
-    font-family:'Lora',serif; font-size:.64rem;
+    font-family:'Lora',serif; font-size:.74rem;
     letter-spacing:.22em; text-transform:uppercase;
     transition:opacity .25s ease;
   }
@@ -578,7 +583,7 @@
     flex:1; min-width:92px; padding:15px 10px;
     background:none; border:1px solid rgba(227,205,189,.42);
     color:var(--crema); cursor:pointer;
-    font-family:'Lora',serif; font-size:1rem;
+    font-family:'Lora',serif; font-size:1.08rem;
     letter-spacing:.04em; text-align:center;
     transition:background .25s, border-color .25s, color .25s;
   }
@@ -620,7 +625,7 @@
   .pantalla.open{opacity:1; pointer-events:auto;}
   .pantalla-inner{
     position:relative;
-    max-width:820px; margin:0 auto; padding:46px 26px 90px;
+    max-width:1340px; margin:0 auto; padding:40px 4vw 90px;
   }
   .pantalla-inner > .label{color:var(--choco-soft); display:block; margin-bottom:10px;}
   .pantalla-inner h2{
@@ -654,19 +659,10 @@
     border-top:1px solid var(--line);
   }
   .cuidado-bloque:first-child{border-top:none; padding-top:4px;}
-  .cb-cabeza{display:flex; align-items:center; gap:11px; margin-bottom:9px;}
-  .cb-swatch{
-    width:26px; height:26px; flex:none; border-radius:50%;
-    border:1px solid var(--line);
-  }
-  .cb-cabeza h4{font-size:1.06rem; font-weight:500;}
-  .cb-cuenta{
-    margin-left:auto; font-size:.58rem;
-    letter-spacing:.16em; text-transform:uppercase;
-    color:var(--choco-soft); opacity:.7; white-space:nowrap;
-  }
+  .cb-cabeza{margin-bottom:9px;}
+  .cb-cabeza h4{font-size:1.24rem; font-weight:500;}
   .cuidado-bloque p{
-    font-size:.88rem; line-height:1.75; color:var(--choco-soft);
+    font-size:.94rem; line-height:1.8; color:var(--choco-soft);
     margin-bottom:11px;
   }
   .cuidado-bloque p:last-child{margin-bottom:0;}
@@ -682,7 +678,7 @@
     display:block; margin:34px auto 0; padding:12px 28px;
     background:none; border:1px solid var(--choco); color:var(--choco);
     cursor:pointer; font-family:'Lora',serif;
-    font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
     transition:background .28s, color .28s;
   }
   .cuidado-link:hover{background:var(--choco); color:var(--crema);}
@@ -694,7 +690,7 @@
     width:100%; padding:14px 0;
     background:none; border:none; border-top:1px solid rgba(227,205,189,.28);
     cursor:pointer; color:var(--crema); font-family:'Lora',serif;
-    font-size:.64rem; letter-spacing:.22em; text-transform:uppercase;
+    font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
     transition:opacity .25s ease;
   }
   .ac-cabeza:hover{opacity:.72;}
@@ -718,6 +714,38 @@
     font-size:.85rem; line-height:1.75;
     color:var(--crema); opacity:.78; padding-bottom:4px;
   }
+  /* ── Guía de talles ──────────────────────── */
+  .gt-grupos{margin:14px 0 4px;}
+  .gt-fila{
+    display:grid; grid-template-columns:1fr auto;
+    gap:2px 12px; align-items:baseline;
+    padding:10px 0; border-top:1px solid rgba(227,205,189,.18);
+    color:var(--crema);
+  }
+  .gt-nombre{font-size:.95rem;}
+  .gt-nums{
+    grid-column:1; font-size:.7rem; opacity:.6;
+    letter-spacing:.06em;
+  }
+  .gt-mm{
+    grid-column:2; grid-row:1/3;
+    font-size:.86rem; opacity:.85; white-space:nowrap;
+  }
+  .gt-fila.gt-no{opacity:.38;}
+  .gt-tabla{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(72px,1fr));
+    gap:1px; margin:16px 0 6px;
+    background:rgba(227,205,189,.16);
+    border:1px solid rgba(227,205,189,.16);
+  }
+  .gt-celda{
+    background:#3a221a; padding:7px 4px; text-align:center;
+    color:var(--crema); font-size:.64rem; opacity:.9; line-height:1.5;
+  }
+  .gt-celda b{display:block; font-weight:500; font-size:.76rem; opacity:1;}
+  .gt-ayuda{font-size:.8rem !important; opacity:.65 !important; padding-top:6px;}
+  .gt-ayuda a{border-bottom:1px solid rgba(227,205,189,.45);}
+
   .ac-leermas{
     background:none; border:none; cursor:pointer; padding:8px 0 14px;
     color:var(--crema); font-family:'Lora',serif;
@@ -1060,8 +1088,7 @@ const INFO_MATERIALES = {
 
   'plata 925': {
     material:
-      'Plata de ley: 92,5% de plata pura. Es plata de verdad, con su brillo y con lo que le es ' +
-      'propio: puede oscurecerse con el tiempo, y se recupera.',
+      'Plata de ley: 92,5% de plata pura.',
     materialLargo:
       'La plata 925, o plata de ley, es una aleación de 92,5% de plata pura con un 7,5% de otros ' +
       'metales. La plata pura sola es demasiado blanda para una joya: se deforma. Esa pequeña ' +
@@ -1085,8 +1112,7 @@ const INFO_MATERIALES = {
 
   'acero blanco': {
     material:
-      'Acero quirúrgico con un baño que le da ese blanco parejo, parecido a la plata pero sin el ' +
-      'mantenimiento. Como el color viene del baño, conviene cuidarlo.',
+      'Acero quirúrgico con un baño que le da ese blanco parejo.',
     materialLargo:
       'El acero blanco es acero quirúrgico con un baño aplicado encima, que es lo que le da ese ' +
       'color blanco parejo tan parecido a la plata. La base es la misma que se usa en instrumental ' +
@@ -1110,8 +1136,7 @@ const INFO_MATERIALES = {
 
   'acero inoxidable': {
     material:
-      'Acero inoxidable macizo, sin baño: el color es el del propio metal. Por eso no se destiñe ' +
-      'ni se pela, y no te mancha la piel.',
+      'Acero inoxidable macizo, sin baño: el color es el del propio metal.',
     materialLargo:
       'El acero inoxidable es una aleación de acero con cromo, y es el cromo el que lo vuelve ' +
       'resistente a la oxidación. A diferencia del acero blanco, acá el color no viene de un ' +
@@ -1133,8 +1158,7 @@ const INFO_MATERIALES = {
 
   'acero chapado en oro': {
     material:
-      'Acero inoxidable con una capa de oro aplicada al vacío (PVD), mucho más pareja y resistente ' +
-      'que un baño de oro común.',
+      'Acero inoxidable con una capa de oro aplicada al vacío (PVD).',
     materialLargo:
       'El chapado al vacío, o PVD, es un proceso bastante más sofisticado que el baño de oro ' +
       'tradicional. En vez de sumergir la pieza en un baño químico, se la coloca en una cámara ' +
@@ -1600,10 +1624,9 @@ function renderGrid(){
   document.getElementById('prodEyebrow').textContent =
     current.mat === 'all' ? 'Colección' : (current.cat === 'all' ? 'Material' : catLabel(current.cat));
 
-  const sinStock = list.filter(p => p.stock<=0).length;
   document.getElementById('filterNote').textContent = showcase
     ? 'Una selección de cada categoría. Elegí un material en el menú para ver todos.'
-    : `${list.length} ${list.length===1?'accesorio':'accesorios'}` + (sinStock ? ` · ${sinStock} sin stock` : '');
+    : `${list.length} ${list.length===1?'accesorio':'accesorios'}`;
 
   document.getElementById('grid').innerHTML = list.length
     ? list.map(cardHTML).join('')
@@ -1664,6 +1687,55 @@ function verSimilares(id){
    ═══════════════════════════════════════════════════════════════ */
 let lbProd = null, lbFotos = [], lbIdx = 0, lbTimer = null;
 
+/* ── Guía de talles (solo anillos) ──────────────────────────────
+   Tabla de medidas: número de talle y diámetro interno en mm.
+   La equivalencia con Chico / Mediano / Grande la definió Sintia:
+   hasta el 13 es Chico, del 14 al 16 Mediano, del 17 en adelante
+   Grande.                                                        */
+const TABLA_TALLES = [
+  [8,15.0],[9,15.2],[10,15.6],[11,16.0],[12,16.2],[13,16.6],
+  [14,17.0],[15,17.2],[16,17.6],
+  [17,18.0],[18,18.2],[19,18.6],[20,19.0],[21,19.3],
+  [22,20.0],[23,20.3],[24,20.6],[25,21.0],
+];
+const GRUPOS_TALLE = [
+  {nombre:'Chico',   desde:8,  hasta:13},
+  {nombre:'Mediano', desde:14, hasta:16},
+  {nombre:'Grande',  desde:17, hasta:25},
+];
+const mm = n => n.toFixed(1).replace('.', ',') + ' mm';
+
+function guiaTalles(p){
+  if(p.catk !== 'anillos') return '';
+  const hay = tallesDe(p).map(t => t.nombre);
+
+  const filas = GRUPOS_TALLE.map(g => {
+    const nums = TABLA_TALLES.filter(([n]) => n >= g.desde && n <= g.hasta);
+    const desdeMM = nums[0][1], hastaMM = nums[nums.length-1][1];
+    const disponible = hay.includes(g.nombre);
+    return `<div class="gt-fila ${disponible?'':'gt-no'}">
+      <span class="gt-nombre">${g.nombre}</span>
+      <span class="gt-nums">N°${g.desde} ${g.hasta===25?'en adelante':'a N°'+g.hasta}</span>
+      <span class="gt-mm">${mm(desdeMM)} – ${mm(hastaMM)}</span>
+    </div>`;
+  }).join('');
+
+  const tabla = TABLA_TALLES.map(([n,d]) =>
+    `<div class="gt-celda"><b>N°${n}</b>${mm(d)}</div>`).join('');
+
+  return `
+    <button class="ac-cabeza" onclick="toggleAc(this)">Guía de talles<span class="ac-signo"></span></button>
+    <div class="ac-cuerpo"><div>
+      <p>Medí el diámetro interno de un anillo que ya uses y te quede cómodo, y buscá esos
+         milímetros en la tabla.</p>
+      <div class="gt-grupos">${filas}</div>
+      <div class="gt-tabla">${tabla}</div>
+      <p class="gt-ayuda">¿No estás segura?
+        <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola! Necesito ayuda para saber mi talle de anillo.')}" target="_blank" rel="noopener">Escribinos</a>
+        y te ayudamos.</p>
+    </div></div>`;
+}
+
 let lbTalle = null;    // talle elegido en la pieza que está abierta
 
 /* Un talle solo → agrega directo. Varios → hay que elegir. */
@@ -1711,17 +1783,18 @@ function agregarConTalle(id){
 function lbInfoHTML(p){
   const agotado = p.stock <= 0;
   const ultimo  = !agotado && p.stock === 1;
-  const estado  = agotado ? 'Sin stock'
-                : (ultimo ? 'Última unidad' : 'Disponible');
+  /* Solo se avisa cuando no hay, o cuando queda una. */
+  const estado  = agotado ? 'Sin stock' : (ultimo ? 'Última unidad' : '');
   return `
     <span class="label">${p.catn}</span>
     <h3>${p.name}</h3>
     <div class="material">${p.mat}</div>
     ${talles(p)}
     <div class="lb-precio">${fmt(p.price)}</div>
-    <div class="lb-stock">${estado}</div>
+    ${estado ? `<div class="lb-stock">${estado}</div>` : ''}
     ${agotado ? `<button class="lb-add" disabled>Sin stock</button>` : selectorTalle(p)}
     <div class="acordeon">
+      ${guiaTalles(p)}
       <button class="ac-cabeza" onclick="toggleAc(this)">Material<span class="ac-signo"></span></button>
       <div class="ac-cuerpo"><div>
         <div class="ac-mat">${p.mat}</div>
@@ -1876,10 +1949,7 @@ function abrirCuidados(){
   document.getElementById('cuidadoGrid').innerHTML = MATERIALS.map(m => {
     const i = infoDe(m);
     return `<div class="cuidado-bloque">
-      <div class="cb-cabeza">
-        <span class="cb-swatch" style="background:${swatchOf(m)}"></span>
-        <h4>${m}</h4>
-      </div>
+      <div class="cb-cabeza"><h4>${m}</h4></div>
       <div class="cb-sub">El material</div>
       ${enParrafos(i.materialLargo)}
       <div class="cb-sub">Cómo cuidarla</div>

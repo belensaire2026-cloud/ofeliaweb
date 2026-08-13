@@ -65,3 +65,4 @@ CARPETAS ACTUALES
   argollitas-click-anchas-acero-blanco         -> Argollitas click anchas · Acero blanco
   argollitas-diseno-chico-acero-blanco         -> Argollitas diseño chico · Acero blanco
   argollitas-diseno-ancho-acero-blanco         -> Argollitas diseño ancho · Acero blanco
+  anillo-corazon-acero-inoxidable              -> Anillo Corazón · Acero inoxidable

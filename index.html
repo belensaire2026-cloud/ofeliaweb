@@ -161,12 +161,12 @@
   .drawer-foot{margin-top:auto; padding-top:34px; font-size:0.82rem; opacity:.72; line-height:1.9;}
   .drawer-foot .social{display:flex; gap:12px; margin-top:14px;}
   .drawer-foot .social a{
-    width:36px; height:36px; border:1px solid rgba(227,205,189,0.4);
+    width:40px; height:40px; border:1px solid rgba(227,205,189,0.4);
     border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size:0.7rem;
-    transition:background .25s, color .25s;
+    transition:background .25s, color .25s, transform .25s;
   }
-  .drawer-foot .social a:hover{background:var(--crema); color:var(--choco);}
+  .drawer-foot .social a:hover{background:var(--crema); color:var(--choco); transform:translateY(-2px);}
+  .social a svg{width:19px; height:19px; display:block;}
 
   /* ── Carrito (derecha) ──────────────────── */
   .cart-panel{
@@ -299,6 +299,35 @@
   .filter-note{
     text-align:center; color:var(--choco-soft);
     font-style:italic; font-size:.88rem; margin-bottom:44px;
+  }
+
+  /* ── Ordenar ─────────────────────────────── */
+  .orden-fila{
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; margin:0 0 18px;
+  }
+  .orden-fila label{
+    font-size:.58rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--choco-soft);
+  }
+  .orden-fila select{
+    appearance:none; -webkit-appearance:none;
+    background:transparent url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 6 8.5 10 4.5' fill='none' stroke='%23331C14' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 12px center;
+    background-size:11px;
+    border:1px solid var(--line); border-radius:5px;
+    padding:9px 34px 9px 14px; cursor:pointer;
+    font-family:'Lora',serif; font-size:.82rem; color:var(--choco);
+    transition:border-color .25s;
+  }
+  .orden-fila select:hover{border-color:var(--choco);}
+  .orden-fila select:focus{outline:none; border-color:var(--choco);}
+
+  /* aviso privado: solo visible entrando con ?admin */
+  .sync-note.admin{
+    background:var(--crema-light); border:1px dashed var(--line);
+    border-radius:5px; display:inline-block;
+    padding:8px 16px; font-style:normal; opacity:1;
+    letter-spacing:.02em;
   }
 
   .product-grid{
@@ -836,11 +865,12 @@
   .contact-info p a:hover{border-color:var(--crema);}
   .contact-info .social{display:flex; gap:12px; margin-top:22px;}
   .contact-info .social a{
-    width:40px;height:40px;border:1px solid rgba(227,205,189,.45);border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:.7rem;
-    transition:background .25s,color .25s;
+    width:44px;height:44px;border:1px solid rgba(227,205,189,.45);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .25s,color .25s,transform .25s;
   }
-  .contact-info .social a:hover{background:var(--crema); color:var(--choco);}
+  .contact-info .social a:hover{background:var(--crema); color:var(--choco); transform:translateY(-2px);}
+  .contact-info .social a svg{width:21px; height:21px;}
   form{display:flex; flex-direction:column; gap:14px;}
   form input, form textarea{
     background:transparent; border:none;
@@ -896,8 +926,8 @@
     <div>Accesorios hechos para durar.</div>
     <div>Buenos Aires, Argentina</div>
     <div class="social">
-      <a href="https://www.instagram.com/ofelia__st" target="_blank" rel="noopener" aria-label="Instagram">IG</a>
-      <a href="https://wa.me/5491162441206" target="_blank" aria-label="WhatsApp">WA</a>
+      <a href="https://www.instagram.com/ofelia__st" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+      <a href="https://wa.me/5491162441206" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2.1 22l5.36-1.4a9.8 9.8 0 0 0 4.58 1.14h.01c5.43 0 9.84-4.4 9.84-9.84C21.89 6.4 17.48 2 12.04 2zm0 17.9h-.01a8.2 8.2 0 0 1-4.15-1.13l-.3-.18-3.08.8.82-3-.19-.31a8.14 8.14 0 0 1-1.25-4.34c0-4.5 3.67-8.16 8.17-8.16 2.18 0 4.23.85 5.77 2.4a8.1 8.1 0 0 1 2.39 5.77c0 4.5-3.66 8.15-8.17 8.15zm4.47-6.1c-.24-.13-1.45-.72-1.68-.8-.22-.08-.39-.12-.55.12-.16.25-.63.8-.77.97-.14.16-.28.18-.52.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.22-1.46-1.37-1.7-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.43.06-.65.3-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.65 4.2 3.72.58.25 1.04.4 1.4.52.59.18 1.13.16 1.55.1.47-.07 1.45-.6 1.66-1.17.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.46-.28z"/></svg></a>
     </div>
   </div>
 </aside>
@@ -927,10 +957,14 @@
 <section id="producto">
   <div class="section-head">
     <span class="label" id="prodEyebrow">Colección</span>
-    <h2 id="prodTitle">Producto</h2>
+    <h2 id="prodTitle">Productos</h2>
     <div class="rule"></div>
   </div>
   <div class="filters" id="filters"></div>
+  <div class="orden-fila" id="ordenFila">
+    <label for="ordenSel">Ordenar por</label>
+    <select id="ordenSel" onchange="cambiarOrden(this.value)"></select>
+  </div>
   <div class="filter-note" id="filterNote"></div>
   <div class="product-grid" id="grid"></div>
   <div class="sync-note" id="syncNote"></div>
@@ -1075,8 +1109,8 @@
       <p><a href="https://www.instagram.com/ofelia__st" target="_blank" rel="noopener">@ofelia__st</a></p>
       <p>Buenos Aires, Argentina</p>
       <div class="social">
-        <a href="https://www.instagram.com/ofelia__st" target="_blank" rel="noopener" aria-label="Instagram">IG</a>
-        <a href="https://wa.me/5491162441206" target="_blank" aria-label="WhatsApp">WA</a>
+        <a href="https://www.instagram.com/ofelia__st" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://wa.me/5491162441206" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2.1 22l5.36-1.4a9.8 9.8 0 0 0 4.58 1.14h.01c5.43 0 9.84-4.4 9.84-9.84C21.89 6.4 17.48 2 12.04 2zm0 17.9h-.01a8.2 8.2 0 0 1-4.15-1.13l-.3-.18-3.08.8.82-3-.19-.31a8.14 8.14 0 0 1-1.25-4.34c0-4.5 3.67-8.16 8.17-8.16 2.18 0 4.23.85 5.77 2.4a8.1 8.1 0 0 1 2.39 5.77c0 4.5-3.66 8.15-8.17 8.15zm4.47-6.1c-.24-.13-1.45-.72-1.68-.8-.22-.08-.39-.12-.55.12-.16.25-.63.8-.77.97-.14.16-.28.18-.52.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.22-1.46-1.37-1.7-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.43.06-.65.3-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.65 4.2 3.72.58.25 1.04.4 1.4.52.59.18 1.13.16 1.55.1.47-.07 1.45-.6 1.66-1.17.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.46-.28z"/></svg></a>
       </div>
     </div>
     <form onsubmit="sendMail(event, this)">
@@ -1328,6 +1362,12 @@ let CATS = [];             // claves de categoría presentes
 let current = {mat:'all', cat:'all'};
 let cart = [];
 let fuente = 'respaldo';
+let TOTAL_FILAS = 0;
+
+/* Modo control: agregá ?admin al final de la dirección
+   (ofelia-st.netlify.app/?admin) y te muestra si está leyendo
+   la planilla. Sin eso, no aparece nada.                     */
+const MODO_ADMIN = /[?&]admin\b/.test(location.search);
 
 const fmt = n => '$' + Number(n||0).toLocaleString('es-AR');
 const slug = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -1364,7 +1404,8 @@ function rowsToProducts(rows){
   const col = re => head.findIndex(h => re.test(h));
   const iN=col(/^producto/), iM=col(/^material/), iC=col(/^categor/),
         iP=col(/^precio/),   iS=col(/^stock/),    iCh=col(/^chico/),
-        iMe=col(/^mediano/), iG=col(/^grande/),   iD=col(/^destacado/), iF=col(/^foto/);
+        iMe=col(/^mediano/), iG=col(/^grande/),   iD=col(/^destacado/), iF=col(/^foto/),
+        iV=col(/^vendidas/);          // opcional: habilita "Más vendidos"
   const out=[];
   for(let r=hi+1; r<rows.length; r++){
     const x=rows[r];
@@ -1379,13 +1420,17 @@ function rowsToProducts(rows){
       ch: iCh<0?0:num(x[iCh]), me: iMe<0?0:num(x[iMe]), gr: iG<0?0:num(x[iG]),
       dest: iD<0 ? false : /^(s[ií]|x|1|true)$/i.test((x[iD]||'').trim()),
       foto: iF<0 ? '' : (x[iF]||'').trim(),
+      fila: out.length,                       // orden en la planilla = antigüedad
+      vendidas: iV<0 ? null : num(x[iV]),
     });
   }
   return out;
 }
 
 function normalizar(list){
-  return list.map(p => ({
+  return list.map((p,i) => ({
+    fila: i,
+    vendidas: null,
     ...p,
     id: p.id || slug(p.name)+'-'+slug(p.mat),
     catk: catKey(p.cat),
@@ -1405,6 +1450,7 @@ async function cargar(){
     }catch(e){ /* sin conexión o planilla no publicada */ }
   }
   if(!list){ list = SNAPSHOT; fuente = 'respaldo'; }
+  TOTAL_FILAS = list.length;
   PRODUCTS = normalizar(list);
 
   /* Materiales: los fijos primero, después cualquier otro que aparezca
@@ -1583,7 +1629,7 @@ function renderMenu(){
   document.getElementById('menu').innerHTML = `
     <li><button class="menu-row leaf" onclick="goTo('inicio')">Inicio</button></li>
     <li>
-      <button class="menu-row" onclick="toggleSub(this)">Producto<span class="chev"></span></button>
+      <button class="menu-row" onclick="toggleSub(this)">Productos<span class="chev"></span></button>
       <div class="submenu"><ul>
         ${bloques}
         <li><button class="menu-row leaf" onclick="filterBy('all','all')" style="font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding-left:16px;opacity:.7;">Ver todo</button></li>
@@ -1610,6 +1656,38 @@ function toggleSub(btn){
 /* ═══════════════════════════════════════════════════════════════
    Grilla
    ═══════════════════════════════════════════════════════════════ */
+/* ── Ordenar la galería ──────────────────────────────────────────
+   "Nuevos ingresos" usa el orden de la planilla: lo último que
+   cargaste abajo de todo es lo más nuevo.
+   "Más vendidos" aparece solo si la hoja Web tiene una columna
+   llamada Vendidas. Si no está, la opción no se muestra.        */
+let orden = 'sugeridos';
+
+const ORDENES = {
+  'sugeridos'  : null,
+  'precio-asc' : (a,b) => a.price - b.price,
+  'precio-desc': (a,b) => b.price - a.price,
+  'nuevos'     : (a,b) => b.fila - a.fila,
+  'vendidos'   : (a,b) => (b.vendidas||0) - (a.vendidas||0),
+};
+
+const hayVentas = () => PRODUCTS.some(p => p.vendidas != null);
+
+function renderOrden(){
+  const ops = [
+    ['sugeridos','Sugeridos'],
+    ['precio-asc','Precio: de menor a mayor'],
+    ['precio-desc','Precio: de mayor a menor'],
+    ['nuevos','Nuevos ingresos'],
+  ];
+  if(hayVentas()) ops.push(['vendidos','Más vendidos']);
+  if(!ORDENES[orden] && orden !== 'sugeridos') orden = 'sugeridos';
+  document.getElementById('ordenSel').innerHTML = ops.map(([k,v]) =>
+    `<option value="${k}" ${orden===k?'selected':''}>${v}</option>`).join('');
+}
+
+function cambiarOrden(v){ orden = v; renderGrid(); }
+
 function renderFilters(){
   const items = [['all','Todo'], ...CATS.map(c => [c, catLabel(c)])];
   document.getElementById('filters').innerHTML = items.map(([k,v]) =>
@@ -1695,12 +1773,16 @@ function renderGrid(){
         (current.mat === 'all' || p.mat === current.mat) &&
         (current.cat === 'all' || p.catk === current.cat));
 
-  // disponibles primero, agotados al final
-  list = [...list].sort((a,b) => (b.stock>0) - (a.stock>0));
+  // disponibles primero, agotados al final; después, el orden elegido
+  const cmp = ORDENES[orden];
+  list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) || (cmp ? cmp(a,b) : 0));
+
+  document.getElementById('ordenFila').style.display = showcase ? 'none' : '';
+  renderOrden();
 
   document.getElementById('prodTitle').textContent =
     current.mat === 'all'
-      ? (current.cat === 'all' ? 'Producto' : catLabel(current.cat))
+      ? (current.cat === 'all' ? 'Productos' : catLabel(current.cat))
       : current.mat;
   document.getElementById('prodEyebrow').textContent =
     current.mat === 'all' ? 'Colección' : (current.cat === 'all' ? 'Material' : catLabel(current.cat));
@@ -1715,9 +1797,14 @@ function renderGrid(){
 
   pintarMedios();
 
-  document.getElementById('syncNote').textContent = fuente === 'planilla'
-    ? 'Stock actualizado desde la planilla.'
-    : '';
+  /* Este aviso es solo para vos: aparece únicamente si entrás con
+     ?admin al final de la dirección. La clienta nunca lo ve.     */
+  const nota = document.getElementById('syncNote');
+  nota.className = 'sync-note' + (MODO_ADMIN ? ' admin' : '');
+  nota.textContent = !MODO_ADMIN ? ''
+    : (fuente === 'planilla'
+        ? `✓ Leyendo la planilla · ${PRODUCTS.length} de ${TOTAL_FILAS} productos publicados`
+        : `⚠ No pudo leer la planilla — está usando la copia de respaldo (${PRODUCTS.length} productos)`);
 }
 
 function filterBy(mat, cat){

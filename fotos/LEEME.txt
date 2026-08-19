@@ -14,7 +14,7 @@ COMO DECIDIS SI UNA PIEZA MUESTRA VIDEO EN LA GALERIA
                              aparece recien al abrir el producto
   1.jpg + 2.jpg + 3.jpg  ->  sin video, como siempre
 
-Poné video solo en las piezas donde sume. No hace falta que todas tengan.
+Pone video solo en las piezas donde sume. No hace falta que todas tengan.
 
 COMO SE COMPORTAN LOS VIDEOS
 ----------------------------
@@ -40,29 +40,39 @@ guiones. Si le cambias el nombre a un producto, renombra tambien la carpeta.
 
 CARPETAS ACTUALES
 -----------------
-
-  cubano-n-0-plata-925                         -> Cubano N°0 · Plata 925
-  cubano-n-1-plata-925                         -> Cubano N°1 · Plata 925
-  cubano-n-2-plata-925                         -> Cubano N°2 · Plata 925
-  cubano-n-3-plata-925                         -> Cubano N°3 · Plata 925
-  cubano-n-4-plata-925                         -> Cubano N°4 · Plata 925
-  cubic-mini-circulo-plata-925                 -> Cubic Mini Circulo · Plata 925
-  cubic-circulo-plata-925                      -> Cubic Circulo · Plata 925
-  cubic-cuadrado-plata-925                     -> Cubic Cuadrado · Plata 925
-  square-cubic-plata-925                       -> Square Cubic · Plata 925
-  anillo-medio-sin-fin-plata-925               -> Anillo: Medio Sin Fin · Plata 925
-  circulo-plata-925                            -> Circulo · Plata 925
-  gota-plata-925                               -> Gota · Plata 925
-  anillo-v-plata-925                           -> Anillo V · Plata 925
-  anillo-calado-plata-925                      -> Anillo calado · Plata 925
-  cadena-eslabon-acero-blanco                  -> Cadena eslabon · Acero blanco
-  cadena-lisa-acero-blanco                     -> Cadena lisa · Acero blanco
-  argollita-gota-colgante-acero-blanco         -> Argollita gota colgante · Acero blanco
-  argollitas-bolitas-circulo-acero-blanco      -> Argollitas bolitas circulo · Acero blanco
-  argollitas-bolitas-triangulo-acero-blanco    -> Argollitas bolitas triangulo · Acero blanco
-  argollitas-mitad-similbrillo-acero-blanco    -> Argollitas mitad similbrillo · Acero blanco
-  argollitas-tenza-buble-acero-blanco          -> Argollitas tenza buble · Acero blanco
-  argollitas-click-anchas-acero-blanco         -> Argollitas click anchas · Acero blanco
-  argollitas-diseno-chico-acero-blanco         -> Argollitas diseño chico · Acero blanco
-  argollitas-diseno-ancho-acero-blanco         -> Argollitas diseño ancho · Acero blanco
-  anillo-corazon-acero-inoxidable              -> Anillo Corazón · Acero inoxidable
+  anillo-azmira-acero-inoxidable
+  anillo-calado-plata-925
+  anillo-circulo-plata-925
+  anillo-corazon-i-acero-inoxidable
+  anillo-corazon-ii-acero-inoxidable
+  anillo-gota-plata-925
+  anillo-irregular-acero-inoxidable
+  anillo-mina-acero-inoxidable
+  anillo-nodo-acero-inoxidable
+  anillo-norix-acero-inoxidable
+  anillo-ovalo-acero-inoxidable
+  anillo-sin-fin-plata-925
+  anillo-star-acero-inoxidable
+  anillo-vanton-acero-inoxidable
+  anillo-vera-plata-925
+  anillo-virel-acero-inoxidable
+  anillo-zafira-acero-inoxidable
+  argollita-duna-n-0-acero-blanco
+  argollita-duna-n-1-acero-blanco
+  argollitas-bombe-acero-blanco
+  argollitas-bubble-acero-blanco
+  argollitas-caviar-circulo-acero-blanco
+  argollitas-caviar-triangulo-acero-blanco
+  argollitas-classic-n-1-plata-925
+  argollitas-classic-n-2-plata-925
+  argollitas-classic-n-3-plata-925
+  argollitas-classic-n-4-plata-925
+  argollitas-classic-n-5-plata-925
+  argollitas-gota-acero-blanco
+  argollitas-marco-plata-925
+  argollitas-ocampo-acero-blanco
+  cadena-eslabon-acero-blanco
+  cadena-lisa-acero-blanco
+  cubic-circulo-plata-925
+  cubic-cuadrado-plata-925
+  cubic-mini-circulo-plata-925

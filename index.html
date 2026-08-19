@@ -127,15 +127,18 @@
     transition:padding-left .28s ease, opacity .28s ease;
   }
   .menu-row:hover{padding-left:8px; opacity:.78;}
+  /* Flecha del menú. Antes era un cuadradito con dos bordes girado
+     45°: al girarlo, las puntas se salían de su propia caja y se
+     veían cortadas. Ahora es un dibujo con aire propio adentro,
+     así que gira sin recortarse.                                 */
   .chev{
-    width:9px; height:9px; flex:none; margin-right:2px;
-    border-right:1.4px solid var(--crema);
-    border-bottom:1.4px solid var(--crema);
-    transform:rotate(45deg);
+    width:15px; height:15px; flex:none; margin-right:4px;
+    background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 6 8 10.5 12.5 6' fill='none' stroke='%23E3CDBD' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center;
+    background-size:15px 15px;
     transition:transform .3s ease;
     opacity:.7;
   }
-  .menu-row.open .chev{transform:rotate(-135deg);}
+  .menu-row.open .chev{transform:rotate(180deg);}
 
   .submenu{
     display:grid; grid-template-rows:0fr;

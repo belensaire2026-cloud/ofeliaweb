@@ -1893,19 +1893,26 @@ function seleccionPortada(){
 
 function renderGrid(){
   const showcase = current.mat === 'all' && current.cat === 'all';
-  let list = showcase
-    ? seleccionPortada()
-    : PRODUCTS.filter(p =>
-        (current.mat === 'all' || p.mat === current.mat) &&
-        (current.cat === 'all' || p.catk === current.cat));
+
+  /* Sin filtros están TODAS las piezas: adelante van las elegidas
+     (una de cada categoría, sin repetir familia) y atrás el resto.
+     Igual solo se ven las primeras y el resto sale con "Ver más". */
+  let list;
+  if(showcase){
+    const elegidas = seleccionPortada();
+    list = [...elegidas, ...PRODUCTS.filter(p => !elegidas.includes(p))];
+  } else {
+    list = PRODUCTS.filter(p =>
+      (current.mat === 'all' || p.mat === current.mat) &&
+      (current.cat === 'all' || p.catk === current.cat));
+  }
 
   // disponibles primero, agotados al final; después, el orden elegido
   const cmp = ORDENES[orden];
   list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) || (cmp ? cmp(a,b) : 0));
 
-  /* En la portada no se ordena: son cuatro piezas elegidas a mano. */
-  document.getElementById('ordenFila').style.display = showcase ? 'none' : '';
-  document.getElementById('gridBarra').className = 'grid-barra' + (showcase ? ' sola' : '');
+  document.getElementById('ordenFila').style.display = '';
+  document.getElementById('gridBarra').className = 'grid-barra';
   renderOrden();
 
   document.getElementById('prodTitle').textContent =
@@ -1915,13 +1922,12 @@ function renderGrid(){
   document.getElementById('prodEyebrow').textContent =
     current.mat === 'all' ? 'Colección' : (current.cat === 'all' ? 'Material' : catLabel(current.cat));
 
-  document.getElementById('filterNote').textContent = showcase
-    ? 'Una selección de cada categoría. Elegí un material en el menú para ver todos.'
-    : `${list.length} ${list.length===1?'accesorio':'accesorios'}`;
+  document.getElementById('filterNote').textContent =
+    `${list.length} ${list.length===1?'accesorio':'accesorios'}`;
 
   /* En listados largos se muestran las primeras POR_TANDA y el resto
      aparece al tocar "Ver más". La portada nunca se corta.        */
-  const corta   = !showcase && list.length > visibles;
+  const corta   = list.length > visibles;
   const visible = corta ? list.slice(0, visibles) : list;
 
   document.getElementById('grid').innerHTML = visible.length

@@ -1196,6 +1196,8 @@ const CON_FOTO = new Set([
   'argollita-duna-n-0-acero-blanco',
   'argollita-duna-n-1-acero-blanco',
   'argollitas-caviar-triangulo-acero-blanco',
+  'argollitas-classic-n-1-plata-925',
+  'argollitas-classic-n-2-plata-925',
   'argollitas-classic-n-3-plata-925',
   'argollitas-classic-n-4-plata-925',
   'argollitas-classic-n-5-plata-925',
@@ -1212,6 +1214,8 @@ const CON_FOTO = new Set([
   'anillo-vanton-acero-inoxidable',
   'anillo-virel-acero-inoxidable',
   'anillo-zafira-acero-inoxidable',
+  'cubic-circulo-plata-925',
+  'cubic-cuadrado-plata-925',
   'cubic-mini-circulo-plata-925',
 ]);
 
@@ -1829,7 +1833,11 @@ function mensajeVacio(){
 /* Portada: una pieza de cada categoría, sin repetir familia (las
    Classic N°3, N°4 y N°5 cuentan como una sola). Primero se toman
    las marcadas Destacado en la planilla y las que tienen stock; si
-   con una por categoría no se llega a cuatro, se da otra vuelta.  */
+   con una por categoría no se llega a PORTADA_MAX, se da otra vuelta.
+   Esto es SOLO la portada: al elegir una categoría en el menú se
+   muestran todas las piezas de esa categoría, sin mezclar.       */
+const PORTADA_MAX = 6;   // cuántas piezas se muestran en la portada
+
 function seleccionPortada(){
   const familia = p => slug(p.name).replace(/-n-\d+$/,'');
   const orden = [...PRODUCTS].sort((a,b) =>
@@ -1843,10 +1851,10 @@ function seleccionPortada(){
 
   const fams = new Set(), elegidos = [];
   let sigue = true;
-  while(elegidos.length < 4 && sigue){
+  while(elegidos.length < PORTADA_MAX && sigue){
     sigue = false;
     for(const cola of colas.values()){
-      if(elegidos.length >= 4) break;
+      if(elegidos.length >= PORTADA_MAX) break;
       while(cola.length){
         const p = cola.shift();
         if(fams.has(familia(p))) continue;

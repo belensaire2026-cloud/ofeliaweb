@@ -1826,24 +1826,33 @@ function mensajeVacio(){
   </div>`;
 }
 
-/* Portada: las piezas marcadas Destacado en la planilla. Si quedan
-   menos de cuatro publicadas (porque todavía no tienen foto), se
-   completa con una pieza de cada categoría, priorizando las que
-   tienen stock, para que la portada nunca quede corta.            */
+/* Portada: una pieza de cada categoría, sin repetir familia (las
+   Classic N°3, N°4 y N°5 cuentan como una sola). Primero se toman
+   las marcadas Destacado en la planilla y las que tienen stock; si
+   con una por categoría no se llega a cuatro, se da otra vuelta.  */
 function seleccionPortada(){
-  const elegidos = PRODUCTS.filter(p => p.dest);
-  if(elegidos.length >= 4) return elegidos;
-  const cats  = new Set(elegidos.map(p => p.catk));
-  const resto = PRODUCTS.filter(p => !elegidos.includes(p))
-                        .sort((a,b) => (b.stock>0) - (a.stock>0));
-  for(const p of resto){
-    if(elegidos.length >= 4) break;
-    if(cats.has(p.catk)) continue;
-    cats.add(p.catk); elegidos.push(p);
+  const familia = p => slug(p.name).replace(/-n-\d+$/,'');
+  const orden = [...PRODUCTS].sort((a,b) =>
+    ((b.dest?1:0)-(a.dest?1:0)) || ((b.stock>0)-(a.stock>0)));
+
+  const colas = new Map();
+  for(const p of orden){
+    if(!colas.has(p.catk)) colas.set(p.catk, []);
+    colas.get(p.catk).push(p);
   }
-  for(const p of resto){
-    if(elegidos.length >= 4) break;
-    if(!elegidos.includes(p)) elegidos.push(p);
+
+  const fams = new Set(), elegidos = [];
+  let sigue = true;
+  while(elegidos.length < 4 && sigue){
+    sigue = false;
+    for(const cola of colas.values()){
+      if(elegidos.length >= 4) break;
+      while(cola.length){
+        const p = cola.shift();
+        if(fams.has(familia(p))) continue;
+        fams.add(familia(p)); elegidos.push(p); sigue = true; break;
+      }
+    }
   }
   return elegidos;
 }

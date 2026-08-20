@@ -599,6 +599,17 @@
   .lb-info .label{color:var(--crema); opacity:.62; font-size:.6rem;}
   .lb-info h3{font-size:1.75rem; font-weight:500; line-height:1.25; margin:7px 0 4px;}
   .lb-info .material{font-style:italic; opacity:.72; font-size:.9rem;}
+  /* ── Botón "Ver más" bajo la grilla ── */
+  .ver-mas-fila{text-align:center; margin-top:34px;}
+  .ver-mas{
+    background:none; border:1px solid var(--choco); color:var(--choco);
+    font-family:'Lora',serif; font-size:.68rem; letter-spacing:.2em;
+    text-transform:uppercase; padding:13px 34px; cursor:pointer;
+    transition:background .25s, color .25s;
+  }
+  .ver-mas:hover{background:var(--choco); color:var(--crema);}
+
+  .lb-info .nota{color:var(--crema); opacity:.72; margin-top:10px; font-size:.8rem;}
   .lb-info .sizes{color:var(--crema); opacity:.8; margin-top:12px; font-size:.78rem;}
   .lb-info .sizes b{color:var(--crema);}
   .lb-precio{font-size:1.3rem; margin:20px 0 5px;}
@@ -983,6 +994,7 @@
     </div>
   </div>
   <div class="product-grid" id="grid"></div>
+  <div class="ver-mas-fila" id="verMasFila" style="display:none"><button class="ver-mas" onclick="verMas()">Ver más</button></div>
   <div class="sync-note" id="syncNote"></div>
 </section>
 
@@ -1218,6 +1230,14 @@ const CON_FOTO = new Set([
   'cubic-cuadrado-plata-925',
   'cubic-mini-circulo-plata-925',
 ]);
+
+/* Notas cortas por pieza. Aparecen debajo del material en la ficha
+   del producto, para aclarar medidas o detalles que la foto no
+   muestra. La clave es el nombre de la carpeta de fotos.          */
+const NOTAS = {
+  'cubic-mini-circulo-plata-925': 'Piedra de 2 mm.',
+  'cubic-circulo-plata-925':      'Piedra de 3 mm.',
+};
 
 const FOTOS_DIR   = 'fotos/';
 const FOTO_EXTS   = ['jpg','jpeg','png','webp'];
@@ -1728,6 +1748,12 @@ function toggleSub(btn){
    llamada Vendidas. Si no está, la opción no se muestra.        */
 let orden = 'sugeridos';
 
+/* Cuántas piezas se muestran antes del botón "Ver más". */
+const POR_TANDA = 12;
+let visibles = POR_TANDA;
+
+function verMas(){ visibles = Infinity; renderGrid(); }
+
 const ORDENES = {
   'sugeridos'  : null,
   'precio-asc' : (a,b) => a.price - b.price,
@@ -1751,7 +1777,7 @@ function renderOrden(){
     `<option value="${k}" ${orden===k?'selected':''}>${v}</option>`).join('');
 }
 
-function cambiarOrden(v){ orden = v; renderGrid(); }
+function cambiarOrden(v){ orden = v; visibles = POR_TANDA; renderGrid(); }
 
 function renderFilters(){
   const items = [['all','Todo'], ...CATS.map(c => [c, catLabel(c)])];
@@ -1893,9 +1919,15 @@ function renderGrid(){
     ? 'Una selección de cada categoría. Elegí un material en el menú para ver todos.'
     : `${list.length} ${list.length===1?'accesorio':'accesorios'}`;
 
-  document.getElementById('grid').innerHTML = list.length
-    ? list.map(cardHTML).join('')
+  /* En listados largos se muestran las primeras POR_TANDA y el resto
+     aparece al tocar "Ver más". La portada nunca se corta.        */
+  const corta   = !showcase && list.length > visibles;
+  const visible = corta ? list.slice(0, visibles) : list;
+
+  document.getElementById('grid').innerHTML = visible.length
+    ? visible.map(cardHTML).join('')
     : mensajeVacio();
+  document.getElementById('verMasFila').style.display = corta ? '' : 'none';
 
   pintarMedios();
 
@@ -1911,6 +1943,7 @@ function renderGrid(){
 
 function filterBy(mat, cat){
   current = {mat, cat};
+  visibles = POR_TANDA;
   renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarTalles(); cerrarProducto();
   document.getElementById('producto').scrollIntoView({behavior:'smooth'});
 }
@@ -2064,6 +2097,7 @@ function lbInfoHTML(p){
     <span class="label">${p.catn}</span>
     <h3>${p.name}</h3>
     <div class="material">${p.mat}</div>
+    ${NOTAS[p.id] ? `<div class="nota">${NOTAS[p.id]}</div>` : ''}
     ${talles(p)}
     <div class="lb-precio">${fmt(p.price)}</div>
     ${estado ? `<div class="lb-stock">${estado}</div>` : ''}

@@ -1193,6 +1193,13 @@ const EMAIL    = 'belensaire2026@gmail.com';
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
   'anillo-azmira-acero-inoxidable',
+  'argollita-duna-n-0-acero-blanco',
+  'argollita-duna-n-1-acero-blanco',
+  'argollitas-caviar-triangulo-acero-blanco',
+  'argollitas-classic-n-3-plata-925',
+  'argollitas-classic-n-4-plata-925',
+  'argollitas-classic-n-5-plata-925',
+  'argollitas-gota-acero-blanco',
   'anillo-calado-plata-925',
   'anillo-circulo-plata-925',
   'anillo-corazon-i-acero-inoxidable',
@@ -1819,10 +1826,32 @@ function mensajeVacio(){
   </div>`;
 }
 
+/* Portada: las piezas marcadas Destacado en la planilla. Si quedan
+   menos de cuatro publicadas (porque todavía no tienen foto), se
+   completa con una pieza de cada categoría, priorizando las que
+   tienen stock, para que la portada nunca quede corta.            */
+function seleccionPortada(){
+  const elegidos = PRODUCTS.filter(p => p.dest);
+  if(elegidos.length >= 4) return elegidos;
+  const cats  = new Set(elegidos.map(p => p.catk));
+  const resto = PRODUCTS.filter(p => !elegidos.includes(p))
+                        .sort((a,b) => (b.stock>0) - (a.stock>0));
+  for(const p of resto){
+    if(elegidos.length >= 4) break;
+    if(cats.has(p.catk)) continue;
+    cats.add(p.catk); elegidos.push(p);
+  }
+  for(const p of resto){
+    if(elegidos.length >= 4) break;
+    if(!elegidos.includes(p)) elegidos.push(p);
+  }
+  return elegidos;
+}
+
 function renderGrid(){
   const showcase = current.mat === 'all' && current.cat === 'all';
   let list = showcase
-    ? PRODUCTS.filter(p => p.dest)
+    ? seleccionPortada()
     : PRODUCTS.filter(p =>
         (current.mat === 'all' || p.mat === current.mat) &&
         (current.cat === 'all' || p.catk === current.cat));

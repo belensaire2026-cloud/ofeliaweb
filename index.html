@@ -1218,7 +1218,6 @@ const CON_FOTO = new Set([
   'argollitas-classic-n-4-plata-925',
   'argollitas-classic-n-5-plata-925',
   'argollitas-gota-acero-blanco',
-  'anillo-calado-plata-925',
   'anillo-circulo-plata-925',
   'anillo-corazon-i-acero-inoxidable',
   'anillo-deriva-plata-925',
@@ -1527,11 +1526,16 @@ function unificar(list){
     const ya = mapa.get(p.id);
     if(!ya){ mapa.set(p.id, {...p}); continue; }
     if(ya.stock <= 0 && p.stock > 0 && p.price > 0) ya.price = p.price;
-    ya.stock += p.stock;
-    ya.ch += p.ch; ya.me += p.me; ya.gr += p.gr;
+    /* La planilla suma por NOMBRE: si la pieza está cargada dos veces,
+       las dos filas traen el mismo total. Por eso se toma el mayor y
+       no la suma, que duplicaría el stock.                          */
+    ya.stock = Math.max(ya.stock, p.stock);
+    ya.ch = Math.max(ya.ch, p.ch);
+    ya.me = Math.max(ya.me, p.me);
+    ya.gr = Math.max(ya.gr, p.gr);
     ya.dest = ya.dest || p.dest;
     if(ya.vendidas != null || p.vendidas != null)
-      ya.vendidas = (ya.vendidas || 0) + (p.vendidas || 0);
+      ya.vendidas = Math.max(ya.vendidas || 0, p.vendidas || 0);
     if(!ya.foto && p.foto) ya.foto = p.foto;
     ya.fila = Math.min(ya.fila, p.fila);
   }

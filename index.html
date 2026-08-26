@@ -1204,6 +1204,7 @@ const EMAIL    = 'belensaire2026@gmail.com';
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
+  'anillos-corazones-iii-plata-925',
   'anillo-azmira-acero-inoxidable',
   'aros-gala-12-mm-plata-925',
   'aros-halo-14-mm-plata-925',
@@ -1230,6 +1231,8 @@ const CON_FOTO = new Set([
   'anillo-vanton-acero-inoxidable',
   'anillo-virel-acero-inoxidable',
   'anillo-zafira-acero-inoxidable',
+  'collar-muna-circulo-plata-925',
+  'collar-muna-corazon-plata-925',
   'cubic-circulo-plata-925',
   'cubic-cuadrado-plata-925',
   'cubic-mini-circulo-plata-925',
@@ -1242,6 +1245,9 @@ const NOTAS = {
   'cubic-mini-circulo-plata-925': 'Piedra de 2 mm.',
   'cubic-circulo-plata-925':      'Piedra de 3 mm.',
   'cubic-mini-cuadrado-plata-925':'Piedra de 3 mm.',
+  'collar-muna-circulo-plata-925': 'Dije punto de luz. Cadena de 42 cm + 3 cm de extensión.',
+  'collar-muna-corazon-plata-925': 'Dije corazón de 6 mm.',
+  'collar-fino-circulo-plata-925': 'Dije punto de luz de 5 mm.',
   'aros-halo-14-mm-plata-925':    'Argolla de 14 mm de diámetro.',
   'aros-gala-12-mm-plata-925':    'Argolla de 12 mm de diámetro.',
 };
@@ -1510,6 +1516,28 @@ function rowsToProducts(rows){
    Red de seguridad: si por algún motivo quedaran menos de 3 piezas
    publicables, se muestran todas igual antes que dejar la tienda
    vacía.                                                          */
+/* Una misma pieza puede estar cargada dos veces en la planilla —
+   por ejemplo cuando cambiás de proveedor y la fila vieja queda con
+   stock 0. En la web tiene que verse UNA sola vez: se suman las
+   existencias y se toma el precio de la fila que todavía tiene
+   unidades.                                                        */
+function unificar(list){
+  const mapa = new Map();
+  for(const p of list){
+    const ya = mapa.get(p.id);
+    if(!ya){ mapa.set(p.id, {...p}); continue; }
+    if(ya.stock <= 0 && p.stock > 0 && p.price > 0) ya.price = p.price;
+    ya.stock += p.stock;
+    ya.ch += p.ch; ya.me += p.me; ya.gr += p.gr;
+    ya.dest = ya.dest || p.dest;
+    if(ya.vendidas != null || p.vendidas != null)
+      ya.vendidas = (ya.vendidas || 0) + (p.vendidas || 0);
+    if(!ya.foto && p.foto) ya.foto = p.foto;
+    ya.fila = Math.min(ya.fila, p.fila);
+  }
+  return [...mapa.values()];
+}
+
 function tieneFoto(p){ return !!p.foto || CON_FOTO.has(p.id); }
 
 function soloConFoto(list){
@@ -1519,15 +1547,15 @@ function soloConFoto(list){
 }
 
 function normalizar(list){
-  const base = list.map((p,i) => ({
+  const base = unificar(list.map((p,i) => ({
     fila: i,
     vendidas: null,
     ...p,
     id: p.id || slug(p.name)+'-'+slug(p.mat),
     catk: catKey(p.cat),
     catn: catLabel(p.cat),
-  })).filter(p => p.price > 0);         // sin precio de venta no se publica
-  return soloConFoto(base);
+  })));                                 // una fila por pieza
+  return soloConFoto(base.filter(p => p.price > 0));   // sin precio no se publica
 }
 
 async function cargar(){

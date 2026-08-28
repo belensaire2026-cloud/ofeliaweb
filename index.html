@@ -626,6 +626,16 @@
     transition:opacity .25s ease;
   }
   .lb-add:hover{opacity:.82;}
+  /* Botón de encargo: aparece cuando la pieza está agotada. */
+  .lb-encargo{
+    display:block; width:100%; box-sizing:border-box;
+    margin-top:10px; padding:13px; text-align:center; text-decoration:none;
+    background:none; border:1px solid rgba(227,205,189,.55); color:var(--crema);
+    font-family:'Lora',serif; font-size:.72rem;
+    letter-spacing:.2em; text-transform:uppercase;
+    transition:background .25s, color .25s;
+  }
+  .lb-encargo:hover{background:var(--crema); color:var(--choco);}
   /* ── Elegir talle ────────────────────────── */
   .talles{margin-bottom:16px;}
   .talles-tit{
@@ -1833,6 +1843,15 @@ function talles(p){
 }
 
 /* Bloque de piezas parecidas, siempre a la vista. */
+/* Cuando una pieza está agotada no se pierde la venta: se ofrece
+   encargarla por WhatsApp con el mensaje ya escrito.             */
+function botonEncargo(p){
+  const msg = `Hola! Quería encargar ${p.name} (${p.mat}). ¿Cuándo la volvés a tener?`;
+  return `<button class="lb-add" disabled>Sin stock</button>
+    <a class="lb-encargo" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}"
+       target="_blank" rel="noopener">Encargar esta pieza</a>`;
+}
+
 function similarInline(p){
   const list = similares(p);
   if(!list.length){
@@ -2146,7 +2165,7 @@ function lbInfoHTML(p){
     ${talles(p)}
     <div class="lb-precio">${fmt(p.price)}</div>
     ${estado ? `<div class="lb-stock">${estado}</div>` : ''}
-    ${agotado ? `<button class="lb-add" disabled>Sin stock</button>` : selectorTalle(p)}
+    ${agotado ? botonEncargo(p) : selectorTalle(p)}
     <div class="acordeon">
       ${guiaTalles(p)}
       <button class="ac-cabeza" onclick="toggleAc(this)">Material<span class="ac-signo"></span></button>

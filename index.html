@@ -1206,6 +1206,37 @@ const EMAIL    = 'belensaire2026@gmail.com';
    Ojo: el nombre del archivo va TODO EN MINÚSCULA (1.jpg, no 1.JPG).
    Si en la planilla cargás un link en la columna Foto, ese link
    gana sobre la carpeta.                                          */
+/* ── Piezas que no se reponen ─────────────────────────────────────
+   Son las del proveedor Docha, al que Sintia no le vuelve a comprar
+   por ahora. Mientras les quede stock se muestran normalmente; en
+   cuanto se agotan desaparecen solas de la web, sin tocar nada.
+   Si algún día volvés a traer una, sacala de esta lista.         */
+const SIN_REPOSICION = new Set([
+  'argollitas-classic-n-1-plata-925',
+  'argollitas-classic-n-2-plata-925',
+  'argollitas-classic-n-3-plata-925',
+  'argollitas-classic-n-4-plata-925',
+  'argollitas-classic-n-5-plata-925',
+  'cubic-mini-circulo-plata-925',
+  'cubic-circulo-plata-925',
+  'cubic-cuadrado-plata-925',
+  'argollitas-marco-plata-925',
+  'anillo-circulo-plata-925',
+  'anillo-gota-plata-925',
+  'anillo-vera-plata-925',
+  'anillo-calado-plata-925',
+  'cadena-eslabon-acero-blanco',
+  'cadena-lisa-acero-blanco',
+  'argollitas-gota-acero-blanco',
+  'argollitas-caviar-circulo-acero-blanco',
+  'argollitas-caviar-triangulo-acero-blanco',
+  'argollitas-ocampo-acero-blanco',
+  'argollitas-bubble-acero-blanco',
+  'argollitas-bombe-acero-blanco',
+  'argollita-duna-n-0-acero-blanco',
+  'argollita-duna-n-1-acero-blanco',
+]);
+
 /* ── Qué piezas se publican ──────────────────────────────────────
    Mientras no tengas la foto de una pieza, no se muestra en la
    web: aparece recién cuando le cargás la carpeta en fotos/.
@@ -1560,6 +1591,11 @@ function soloConFoto(list){
   return conFoto.length >= 3 ? conFoto : list;   // red de seguridad
 }
 
+/* Las piezas sin reposición se caen del catálogo al quedar en cero. */
+function seSigueVendiendo(p){
+  return p.stock > 0 || !SIN_REPOSICION.has(p.id);
+}
+
 function normalizar(list){
   const base = unificar(list.map((p,i) => ({
     fila: i,
@@ -1569,7 +1605,7 @@ function normalizar(list){
     catk: catKey(p.cat),
     catn: catLabel(p.cat),
   })));                                 // una fila por pieza
-  return soloConFoto(base.filter(p => p.price > 0));   // sin precio no se publica
+  return soloConFoto(base.filter(p => p.price > 0 && seSigueVendiendo(p)));
 }
 
 async function cargar(){

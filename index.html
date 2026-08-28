@@ -1843,6 +1843,9 @@ let visibles = POR_TANDA;
 
 function verMas(){ visibles = Infinity; renderGrid(); }
 
+/* La plata encabeza cuando no hay material elegido. */
+const esPlata = p => /plata/i.test(p.mat || '');
+
 const ORDENES = {
   'sugeridos'  : null,
   'precio-asc' : (a,b) => a.price - b.price,
@@ -2005,9 +2008,17 @@ function renderGrid(){
       (current.cat === 'all' || p.catk === current.cat));
   }
 
-  // disponibles primero, agotados al final; después, el orden elegido
+  /* Orden: primero lo que hay en stock; después, si la clienta no
+     eligió un material ni un orden propio, la plata va adelante;
+     por último el criterio elegido en el desplegable.
+     Si elige "precio" o "más vendidos", ese criterio manda y la
+     plata deja de tener prioridad.                                */
   const cmp = ORDENES[orden];
-  list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) || (cmp ? cmp(a,b) : 0));
+  const plataPrimero = current.mat === 'all' && orden === 'sugeridos';
+  list = [...list].sort((a,b) =>
+       ((b.stock>0) - (a.stock>0))
+    || (plataPrimero ? (esPlata(b) - esPlata(a)) : 0)
+    || (cmp ? cmp(a,b) : 0));
 
   document.getElementById('ordenFila').style.display = '';
   document.getElementById('gridBarra').className = 'grid-barra';

@@ -1245,9 +1245,6 @@ const SIN_REPOSICION = new Set([
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
-  'anillo-corazon-ii-acero-inoxidable',
-  'anillo-calado-plata-925',
-  'cubic-cuadrado-plata-925',
   'anillos-corazones-iii-plata-925',
   'anillo-azmira-acero-inoxidable',
   'aros-gala-12-mm-plata-925',
@@ -1399,6 +1396,29 @@ const INFO_MATERIALES = {
   },
 
   'acero chapado en oro': {
+    material:
+      'Acero inoxidable con una capa de oro aplicada al vacío (PVD).',
+    materialLargo:
+      'El chapado al vacío, o PVD, es un proceso bastante más sofisticado que el baño de oro ' +
+      'tradicional. En vez de sumergir la pieza en un baño químico, se la coloca en una cámara ' +
+      'sellada al vacío donde el oro se vaporiza y se va depositando sobre la superficie, capa ' +
+      'sobre capa.\n\n' +
+      'El resultado es un acabado más limpio, más uniforme y bastante más resistente a los rayones ' +
+      'y a la decoloración. Con uso regular y buen cuidado, estas piezas conservan el dorado durante ' +
+      'años. Además, esa capa funciona como barrera entre el metal y la piel, así que suele caer ' +
+      'bien incluso en pieles sensibles.',
+    cuidado:
+      'Con buen cuidado el dorado dura años. Perfume y crema siempre antes de ponértela, nunca ' +
+      'encima. Guardala seca y sola, sin rozar otras piezas.',
+    cuidadoLargo:
+      'Lo que cuida el dorado es evitar los químicos. Perfume, crema y desodorante siempre antes de ' +
+      'ponerte la pieza, nunca encima de ella.\n\n' +
+      'Guardala seca, en su bolsita, y sola: el roce con otras piezas es lo que más marca el ' +
+      'terminado. Sacátela para bañarte, para la pileta y para entrenar.\n\n' +
+      'Limpiala solo con un paño suave y seco. Nada de limpiametales ni de productos para plata: ' +
+      'son abrasivos y se llevan puesta la capa de oro.',
+  },
+  'acero dorado': {
     material:
       'Acero inoxidable con una capa de oro aplicada al vacío (PVD).',
     materialLargo:
@@ -1843,9 +1863,6 @@ let visibles = POR_TANDA;
 
 function verMas(){ visibles = Infinity; renderGrid(); }
 
-/* La plata encabeza cuando no hay material elegido. */
-const esPlata = p => /plata/i.test(p.mat || '');
-
 const ORDENES = {
   'sugeridos'  : null,
   'precio-asc' : (a,b) => a.price - b.price,
@@ -1957,6 +1974,17 @@ function mensajeVacio(){
   </div>`;
 }
 
+/* Orden de los materiales cuando la vista está en "Sugeridos":
+   primero el dorado y la plata mezclados, después el inoxidable y
+   por último el acero blanco.                                     */
+function rangoMaterial(m){
+  const s = (m || '').toLowerCase().trim();
+  if(s.startsWith('acero dorado') || s.startsWith('plata')) return 0;
+  if(s.startsWith('acero inox')) return 1;
+  if(s.startsWith('acero blanco')) return 2;
+  return 3;
+}
+
 /* Portada: una pieza de cada categoría, sin repetir familia (las
    Classic N°3, N°4 y N°5 cuentan como una sola). Primero se toman
    las marcadas Destacado en la planilla y las que tienen stock; si
@@ -2008,17 +2036,10 @@ function renderGrid(){
       (current.cat === 'all' || p.catk === current.cat));
   }
 
-  /* Orden: primero lo que hay en stock; después, si la clienta no
-     eligió un material ni un orden propio, la plata va adelante;
-     por último el criterio elegido en el desplegable.
-     Si elige "precio" o "más vendidos", ese criterio manda y la
-     plata deja de tener prioridad.                                */
+  // disponibles primero, agotados al final; después, el orden elegido
   const cmp = ORDENES[orden];
-  const plataPrimero = current.mat === 'all' && orden === 'sugeridos';
-  list = [...list].sort((a,b) =>
-       ((b.stock>0) - (a.stock>0))
-    || (plataPrimero ? (esPlata(b) - esPlata(a)) : 0)
-    || (cmp ? cmp(a,b) : 0));
+  list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) ||
+    (cmp ? cmp(a,b) : rangoMaterial(a.mat) - rangoMaterial(b.mat)));
 
   document.getElementById('ordenFila').style.display = '';
   document.getElementById('gridBarra').className = 'grid-barra';

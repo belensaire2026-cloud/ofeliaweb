@@ -1292,6 +1292,15 @@ const CON_FOTO = new Set([
   'cubic-mini-circulo-plata-925',
 ]);
 
+/* Nombre que se muestra en la web, cuando difiere del de la planilla.
+   Sirve para piezas que en la planilla llevan un sufijo para no
+   confundirlas entre sí (por ejemplo la "D" de dorado), pero que en
+   el catálogo tienen que verse con el nombre limpio.
+   La clave es el nombre de la carpeta de fotos.                    */
+const NOMBRES = {
+  'argollitas-classic-n-1-d-acero-dorado': 'Argollitas Classic N°1',
+};
+
 /* Notas cortas por pieza. Aparecen debajo del material en la ficha
    del producto, para aclarar medidas o detalles que la foto no
    muestra. La clave es el nombre de la carpeta de fotos.          */
@@ -1643,6 +1652,9 @@ function normalizar(list){
     catk: catKey(p.cat),
     catn: catLabel(p.cat),
   })));                                 // una fila por pieza
+  for(const p of base){
+    if(NOMBRES[p.id]) p.name = NOMBRES[p.id];
+  }
   return soloConFoto(base.filter(p => p.price > 0 && seSigueVendiendo(p)));
 }
 

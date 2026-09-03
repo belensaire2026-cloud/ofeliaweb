@@ -1288,6 +1288,7 @@ const CON_FOTO = new Set([
   'collar-sardina-acero-dorado',
   'collar-muna-circulo-plata-925',
   'collar-muna-corazon-plata-925',
+  'aritos-perla-plata-925',
   'cubic-circulo-plata-925',
   'cubic-mini-circulo-plata-925',
 ]);
@@ -1306,13 +1307,15 @@ const NOMBRES = {
    muestra. La clave es el nombre de la carpeta de fotos.          */
 const NOTAS = {
   'cubic-mini-circulo-plata-925': 'Piedra de 2 mm.',
-  'cubic-circulo-plata-925':      'Piedra de 3 mm.',
+  'cubic-circulo-plata-925':      'Piedra de 5 mm.',
+  'aritos-perla-plata-925':       'Perla de 4 mm.',
   'cubic-mini-cuadrado-plata-925':'Piedra de 3 mm.',
   'collar-muna-circulo-plata-925': 'Dije punto de luz. Cadena de 42 cm + 3 cm de extensión.',
   'collar-muna-corazon-plata-925': 'Dije corazón de 6 mm.',
   'collar-fino-circulo-plata-925': 'Dije punto de luz de 5 mm.',
   'aros-halo-14-mm-plata-925':    'Argolla de 14 mm de diámetro.',
   'aros-gala-12-mm-plata-925':    'Argolla de 12 mm de diámetro.',
+  'argollitas-marco-plata-925':   'Argolla de 10 mm.',
   'aros-atlas-acero-dorado':      '30,8 mm de largo.',
 };
 
@@ -2005,7 +2008,7 @@ function mensajeVacio(){
    por último el acero blanco.                                     */
 function rangoMaterial(m){
   const s = (m || '').toLowerCase().trim();
-  if(s.startsWith('acero dorado') || s.startsWith('plata')) return 0;
+  if(s.startsWith('acero dorado') || s.startsWith('acero chapado') || s.startsWith('plata')) return 0;
   if(s.startsWith('acero inox')) return 1;
   if(s.startsWith('acero blanco')) return 2;
   return 3;

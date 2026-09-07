@@ -1707,6 +1707,10 @@ async function cargar(){
   }
 
   renderMenu(); renderFilters(); renderGrid(); renderCart();
+
+  /* Si alguien entró con un link a una pieza, se la abrimos. */
+  const idInicial = idDeURL();
+  if(idInicial && PRODUCTS.some(x => x.id === idInicial)) abrirProducto(idInicial, true);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2291,9 +2295,36 @@ function lbInfoHTML(p){
     ${agotado ? similarInline(p) : ''}`;
 }
 
-async function abrirProducto(id){
+/* ── Link directo a cada pieza ──────────────────────────────────
+   Al abrir una ficha la dirección del navegador pasa a terminar en
+   #/pieza/<id>. Ese link se puede copiar y mandar: quien lo abre
+   cae directo en esa pieza. El botón "atrás" cierra la ficha.   */
+let urlPropia = false;   // ¿el # que hay ahora lo puso la web al abrir?
+
+function idDeURL(){
+  const m = location.hash.match(/^#\/pieza\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+window.addEventListener('popstate', () => {
+  const id = idDeURL();
+  if(id){
+    if(!lbProd || lbProd.id !== id) abrirProducto(id, true);
+  }else if(lbProd){
+    cerrarProducto(true);
+  }
+});
+
+async function abrirProducto(id, desdeURL){
   const p = PRODUCTS.find(x => x.id === id);
   if(!p) return;
+  if(!desdeURL){
+    const nuevo = '#/pieza/' + encodeURIComponent(id);
+    if(location.hash !== nuevo){
+      history.pushState({pieza:id}, '', nuevo);
+      urlPropia = true;
+    }
+  }
   lbProd = p; lbIdx = 0; lbFotos = []; lbTalle = null;
   frenarAuto();
 
@@ -2371,11 +2402,14 @@ function arrancarAuto(){
 }
 function frenarAuto(){ if(lbTimer){ clearInterval(lbTimer); lbTimer = null; } }
 
-function cerrarProducto(){
+function cerrarProducto(desdeURL){
   frenarAuto();
   lbProd = null; lbFotos = [];
   document.getElementById('lb').classList.remove('open');
   document.body.style.overflow = '';
+  if(desdeURL || !idDeURL()) return;
+  if(urlPropia){ urlPropia = false; history.back(); }
+  else history.replaceState({}, '', location.pathname + location.search);
 }
 
 /* Se frena sola si estás mirando una foto, y sigue cuando salís. */

@@ -1174,7 +1174,7 @@
 
 // Link CSV de la hoja "Web" de tu planilla de Google.
 // Archivo → Compartir → Publicar en la web → hoja "Web" → formato CSV.
-const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=1886371706&single=true&output=csv';
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=158291260&single=true&output=csv';
 
 const WHATSAPP = '5491162441206';       // 54 + 9 + número sin 0 ni 15
 const EMAIL    = 'belensaire2026@gmail.com';
@@ -1690,16 +1690,41 @@ function normalizar(list){
   return soloConFoto(base.filter(p => p.price > 0 && seSigueVendiendo(p)));
 }
 
+/* Lee un CSV publicado y lo convierte en productos. Devuelve null si no sirve. */
+async function leerCSV(url){
+  try{
+    const r = await fetch(url + (url.includes('?')?'&':'?') + 'cb=' + Math.floor(Date.now()/60000));
+    if(!r.ok) return null;
+    const txt = await r.text();
+    if(!/DATOS PARA LA WEB/i.test(txt) && !/Producto,Material,Categor/i.test(txt)) return null;
+    const parsed = rowsToProducts(parseCSV(txt));
+    return parsed.length ? parsed : null;
+  }catch(e){ return null; }
+}
+
+/* Si la planilla se re-importa desde Google Sheets (Archivo → Importar →
+   Reemplazar hoja de cálculo), las hojas cambian de gid y el link de arriba
+   deja de servir. En ese caso buscamos sola la hoja "Web" entre las hojas
+   publicadas del mismo documento, así la página no se cae. */
+async function buscarHojaWeb(){
+  try{
+    const base = SHEET_CSV.split('/pub?')[0];
+    const html = await fetch(base + '/pubhtml?cb=' + Math.floor(Date.now()/60000)).then(r => r.ok ? r.text() : '');
+    const gids = [...new Set([...html.matchAll(/gid=(\d+)/g)].map(m => m[1]))];
+    for(const g of gids){
+      const list = await leerCSV(base + '/pub?gid=' + g + '&single=true&output=csv');
+      if(list) return list;
+    }
+  }catch(e){ /* nada */ }
+  return null;
+}
+
 async function cargar(){
   let list = null;
   if(SHEET_CSV && SHEET_CSV.startsWith('http')){
-    try{
-      const r = await fetch(SHEET_CSV + (SHEET_CSV.includes('?')?'&':'?') + 'cb=' + Math.floor(Date.now()/60000));
-      if(r.ok){
-        const parsed = rowsToProducts(parseCSV(await r.text()));
-        if(parsed.length){ list = parsed; fuente = 'planilla'; }
-      }
-    }catch(e){ /* sin conexión o planilla no publicada */ }
+    list = await leerCSV(SHEET_CSV);
+    if(list) fuente = 'planilla';
+    else { list = await buscarHojaWeb(); if(list) fuente = 'planilla'; }
   }
   if(!list){ list = SNAPSHOT; fuente = 'respaldo'; }
   TOTAL_FILAS = list.length;

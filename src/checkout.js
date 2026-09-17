@@ -103,51 +103,68 @@ export async function crearPago(request, env){
   /* El recargo se recalcula acá; no se confía en el navegador. */
   const subtotal = mpItems.reduce((a, i) => a + i.unit_price * i.quantity, 0);
   const recargo  = Math.round((subtotal + costoEnvio) * RECARGO_TARJETA);
-  if(recargo > 0){
-    mpItems.push({
-      id: 'recargo',
-      title: 'Costo de pago',
-      quantity: 1,
-      unit_price: recargo,
-      currency_id: 'ARS'
-    });
-  }
 
-  const ref = 'OF-' + Date.now().toString(36).toUpperCase();
-  const site = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/,'');
+  const ref  = 'OF-' + Date.now().toString(36).toUpperCase();
+  const site = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
+  const dos  = n => (Math.round(n * 100) / 100).toFixed(2);
 
-  const pref = {
-    items: mpItems,
-    payer: {
-      name: comprador.nombre,
-      email: comprador.email,
-      phone: comprador.telefono ? { number: String(comprador.telefono) } : undefined,
-      identification: comprador.dni ? { type:'DNI', number:String(comprador.dni) } : undefined,
-      address: envio.calle ? {
-        zip_code: String(envio.cp||''),
-        street_name: String(envio.calle||''),
-        street_number: String(envio.numero||'')
-      } : undefined
-    },
-    shipments: { cost: costoEnvio, mode: 'not_specified' },
-    back_urls: {
-      success: `${site}/?pago=ok&ref=${ref}`,
-      pending: `${site}/?pago=pendiente&ref=${ref}`,
-      failure: `${site}/?pago=error&ref=${ref}`
-    },
-    auto_return: 'approved',
+  /* Orders API: los items van con importes en texto y con dos decimales.
+     El envío y el recargo se suman como líneas más. */
+  const lineas = mpItems.map(i => ({
+    title: i.title,
+    description: i.description,
+    quantity: i.quantity,
+    unit_price: dos(i.unit_price),
+    total_amount: dos(i.unit_price * i.quantity),
+    unit_measure: 'unit'
+  }));
+  if (costoEnvio > 0) lineas.push({
+    title: envio.nombre || 'Envío', quantity: 1,
+    unit_price: dos(costoEnvio), total_amount: dos(costoEnvio), unit_measure: 'unit'
+  });
+  if (recargo > 0) lineas.push({
+    title: 'Costo de pago', quantity: 1,
+    unit_price: dos(recargo), total_amount: dos(recargo), unit_measure: 'unit'
+  });
+
+  const total = subtotal + costoEnvio + recargo;
+
+  const orden = {
+    type: 'online',
+    processing_mode: 'automatic',
+    total_amount: dos(total),
     external_reference: ref,
-    statement_descriptor: 'OFELIA ST',
-    metadata: { envio, comprador }
+    payer: {
+      email: comprador.email,
+      first_name: String(comprador.nombre || '').split(' ')[0] || undefined,
+      identification: comprador.dni
+        ? { type: 'DNI', number: String(comprador.dni) } : undefined
+    },
+    items: lineas,
+    config: {
+      online: {
+        success_url: `${site}/?pago=ok&ref=${ref}`,
+        pending_url: `${site}/?pago=pendiente&ref=${ref}`,
+        failure_url: `${site}/?pago=error&ref=${ref}`,
+        auto_return: 'approved'
+      }
+    }
   };
 
-  const r = await fetch('https://api.mercadopago.com/checkout/preferences', {
-    method:'POST',
-    headers:{ Authorization:'Bearer ' + env.MP_ACCESS_TOKEN, 'Content-Type':'application/json' },
-    body: JSON.stringify(pref)
+  const r = await fetch('https://api.mercadopago.com/v1/orders', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN,
+      'Content-Type': 'application/json',
+      accept: 'application/json',
+      'X-Idempotency-Key': ref + '-' + crypto.randomUUID()
+    },
+    body: JSON.stringify(orden)
   });
   const d = await r.json();
-  if(!r.ok) return json({ error:'mp', detalle:d.message || d.error || 'desconocido' }, 502);
+  if (!r.ok || !d.checkout_url) {
+    return json({ error: 'mp', detalle: d.message || d.error || 'desconocido' }, 502);
+  }
 
-  return json({ ref, url: d.init_point || d.sandbox_init_point });
+  return json({ ref, url: d.checkout_url });
 }

@@ -13,6 +13,10 @@ Cloudflare → tu proyecto → Settings → Environment variables
   MP_ACCESS_TOKEN   ← marcala como "Secret" / "Encrypt"
   SITE_URL          ← https://tudominio.com  (sin barra al final)
 
+  Al crear la aplicación en Mercado Pago, elegí:
+     Solución: Checkout Pro
+     Tipo de API: API de Orders   ← la nueva, NO Preferences
+
   De dónde sale el access token:
   mercadopago.com.ar/developers → Tus integraciones → Crear aplicación
   → Credenciales de producción → Access Token.

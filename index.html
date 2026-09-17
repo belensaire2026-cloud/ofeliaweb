@@ -934,6 +934,50 @@
     z-index:460; transition:transform .4s cubic-bezier(.5,1.5,.5,1);
   }
   .toast.show{transform:translate(-50%,0);}
+
+  /* ── Checkout ─────────────────────────────── */
+  .co-grid{display:grid; grid-template-columns:1.25fr .85fr; gap:38px; align-items:start; margin-top:26px;}
+  .co-form{display:flex; flex-direction:column; gap:16px;}
+  .co-fila{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .co-form label{display:flex; flex-direction:column; gap:6px; font-size:.78rem;
+    letter-spacing:.06em; color:var(--choco-soft);}
+  .co-form input, .co-form select{
+    font-family:inherit; font-size:1rem; color:var(--choco);
+    background:var(--crema-pale); border:1px solid var(--line); border-radius:3px;
+    padding:11px 13px; outline:none; transition:border-color .2s;}
+  .co-form input:focus, .co-form select:focus{border-color:var(--choco);}
+  .co-ops{display:flex; flex-direction:column; gap:10px;}
+  .co-form .co-op, .co-op{display:flex; flex-direction:row; align-items:center; gap:12px; cursor:pointer; font-size:1rem; letter-spacing:0; color:var(--choco);
+    border:1px solid var(--line); border-radius:4px; padding:14px 16px; transition:border-color .2s, background .2s;}
+  .co-op:hover{border-color:var(--choco-soft);}
+  .co-op.sel{border-color:var(--choco); background:var(--crema-light);}
+  .co-op input{margin:0; accent-color:var(--choco); flex:none; width:auto;}
+  .co-op .t{font-size:1rem; line-height:1.35; flex:1;}
+  .co-op .t small{display:block; font-size:.78rem; opacity:.62; margin-top:2px;}
+  .co-op .pz{margin-left:auto; font-size:1rem; white-space:nowrap;}
+  .co-oculto{display:none !important;}
+  .co-resumen{border:1px solid var(--line); border-radius:4px; padding:22px 20px; background:var(--crema-light);
+    position:sticky; top:96px;}
+  .co-res-row{display:flex; justify-content:space-between; gap:14px; font-size:.92rem; padding:7px 0;}
+  .co-res-row small{display:block; opacity:.6; font-size:.76rem;}
+  .co-res-sep{height:1px; background:var(--line); margin:12px 0;}
+  .co-res-total{display:flex; justify-content:space-between; font-size:1.18rem; padding-top:4px;}
+  .co-aviso{font-size:.8rem; opacity:.7; margin-top:10px; line-height:1.45;}
+  .co-datos{border:1px solid var(--line); border-radius:4px; background:var(--crema-pale); padding:16px 18px; margin-top:4px;}
+  .co-dato{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:7px 0;}
+  .co-dato .k{font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; opacity:.6;}
+  .co-dato .v{font-size:1.02rem; word-break:break-all; text-align:right; flex:1;}
+  .co-copiar{font-family:inherit; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+    background:none; border:1px solid var(--line); border-radius:3px; padding:5px 10px;
+    color:var(--choco); cursor:pointer; transition:border-color .2s;}
+  .co-copiar:hover{border-color:var(--choco);}
+  .co-error{color:#8a2b22; font-size:.88rem; margin-top:10px; display:none;}
+  .co-error.show{display:block;}
+  @media(max-width:820px){
+    .co-grid{grid-template-columns:1fr; gap:26px;}
+    .co-fila{grid-template-columns:1fr;}
+    .co-resumen{position:static;}
+  }
 </style>
 </head>
 <body>
@@ -2655,14 +2699,321 @@ function renderCart(){
     </div>`).join('')
     : '<div class="cart-empty">Todavía no agregaste nada.</div>';
 }
+/* ═══════════════════════════════════════════════════════════════
+   Checkout: datos → envío → Mercado Pago
+   ═══════════════════════════════════════════════════════════════ */
+const PROVINCIAS = [
+  ['C','Ciudad de Buenos Aires'],['B','Buenos Aires'],['K','Catamarca'],['H','Chaco'],
+  ['U','Chubut'],['X','Córdoba'],['W','Corrientes'],['E','Entre Ríos'],['P','Formosa'],
+  ['Y','Jujuy'],['L','La Pampa'],['F','La Rioja'],['M','Mendoza'],['N','Misiones'],
+  ['Q','Neuquén'],['R','Río Negro'],['A','Salta'],['J','San Juan'],['D','San Luis'],
+  ['Z','Santa Cruz'],['S','Santa Fe'],['G','Santiago del Estero'],['V','Tierra del Fuego'],
+  ['T','Tucumán'],
+];
+
+/* ── Cobro ────────────────────────────────────────────────────
+   RECARGO_TARJETA en 0: no se le suma nada a quien paga por
+   Mercado Pago. Si alguna vez querés cobrar un recargo, poné
+   por ejemplo 0.053 acá Y en src/checkout.js, en los dos.
+   Los datos de transferencia se muestran tal cual acá.        */
+const RECARGO_TARJETA = 0;
+const TRANSFERENCIA = {
+  titular: 'Sintia Marisa Simonetti',
+  alias:   'Sintiasimonetti',
+  cvu:     '',          // ← pegá acá tu CVU y aparece solo
+  banco:   'Mercado Pago'
+};
+
+let coMedio   = 'mp';         // mp | transferencia
+let coEntrega = 'retiro';     // retiro | domicilio | sucursal
+let coTarifa  = null;         // {tipo, nombre, precio}
+let coTarifas = [];
+let coCotizando = false;
+
+const subtotalCarrito = () => cart.reduce((s,x) => s + x.qty * x.price, 0);
+const costoEnvio      = () => coEntrega === 'retiro' ? 0 : (coTarifa ? coTarifa.precio : 0);
+const recargoTarjeta  = () => coMedio === 'mp'
+  ? Math.round((subtotalCarrito() + costoEnvio()) * RECARGO_TARJETA) : 0;
+const totalPedido     = () => subtotalCarrito() + costoEnvio() + recargoTarjeta();
+
 function checkout(){
   if(!cart.length){ toast('Tu carrito está vacío'); return; }
-  const lines = cart.map(x =>
-    `• ${x.qty}x ${x.name} (${x.mat}${x.talle && x.talle!=='Único' ? ` · talle ${x.talle}` : ''})`
-  ).join('%0A');
-  const total = cart.reduce((s,x) => s + x.qty * x.price, 0);
-  window.open(`https://wa.me/${WHATSAPP}?text=Hola Ofelia St, quiero pedir:%0A${lines}%0ATotal: ${fmt(total)}`, '_blank');
+  abrirCheckout();
 }
+
+function abrirCheckout(){
+  closeAll();
+  const sel = document.querySelector('#pantallaCheckout select[name=provincia]');
+  if(!sel.options.length){
+    sel.innerHTML = '<option value="">Elegí…</option>' +
+      PROVINCIAS.map(([c,n]) => `<option value="${c}">${n}</option>`).join('');
+  }
+  pintarEntrega();
+  pintarMedios();
+  pintarResumen();
+  document.getElementById('pantallaCheckout').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarCheckout(){
+  document.getElementById('pantallaCheckout').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pintarEntrega(){
+  const ops = [
+    ['retiro','Retiro en persona','Coordinamos por WhatsApp. Sin costo.','Gratis'],
+    ['domicilio','Envío a domicilio','Correo Argentino, a la puerta de tu casa.',''],
+    ['sucursal','Envío a sucursal','Lo retirás en la sucursal de Correo que elijas.',''],
+  ];
+  document.getElementById('coEntrega').innerHTML = ops.map(([v,t,d,pz]) => `
+    <label class="co-op${coEntrega===v?' sel':''}" onclick="elegirEntrega('${v}')">
+      <input type="radio" name="entrega" value="${v}" ${coEntrega===v?'checked':''}>
+      <span class="t">${t}<small>${d}</small></span>
+      <span class="pz">${pz}</span>
+    </label>`).join('');
+}
+
+function elegirEntrega(v){
+  coEntrega = v; coTarifa = null; coTarifas = [];
+  pintarEntrega();
+  const campos = document.getElementById('coCamposEnvio');
+  campos.classList.toggle('co-oculto', v === 'retiro');
+  document.getElementById('coDomicilio').classList.toggle('co-oculto', v !== 'domicilio');
+  document.getElementById('coSucursal').classList.toggle('co-oculto', v !== 'sucursal');
+  pintarTarifas();
+  pintarResumen();
+  if(v !== 'retiro') cpCambio();
+}
+
+let coCpTimer;
+function cpCambio(){
+  clearTimeout(coCpTimer);
+  coCpTimer = setTimeout(cotizar, 500);
+}
+
+async function cotizar(){
+  const f  = document.getElementById('coForm');
+  const cp = (f.cp.value || '').replace(/\D/g,'');
+  if(coEntrega === 'retiro' || cp.length < 4){ coTarifas = []; coTarifa = null; pintarTarifas(); pintarResumen(); return; }
+  coCotizando = true; pintarTarifas();
+  try{
+    const r = await fetch('/api/envios', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ cp })
+    });
+    const d = await r.json();
+    const quiero = coEntrega === 'sucursal' ? 'S' : 'D';
+    coTarifas = (d.opciones || []).filter(o => o.tipo === quiero);
+    if(!coTarifas.length) coTarifas = (d.opciones || []);
+    coTarifa = coTarifas[0] || null;
+  }catch(_){
+    coTarifas = []; coTarifa = null;
+  }
+  coCotizando = false;
+  pintarTarifas(); pintarResumen();
+}
+
+function pintarTarifas(){
+  const box = document.getElementById('coTarifas');
+  const tit = document.getElementById('coTituloEnvio');
+  if(coEntrega === 'retiro'){ box.innerHTML=''; tit.style.display='none'; return; }
+  tit.style.display = '';
+  if(coCotizando){ box.innerHTML = '<div class="co-aviso">Calculando el envío…</div>'; return; }
+  if(!coTarifas.length){
+    box.innerHTML = '<div class="co-aviso">Escribí tu código postal para calcular el envío.</div>';
+    return;
+  }
+  box.innerHTML = coTarifas.map((o,i) => `
+    <label class="co-op${coTarifa===o?' sel':''}" onclick="elegirTarifa(${i})">
+      <input type="radio" name="tarifa" ${coTarifa===o?'checked':''}>
+      <span class="t">${o.nombre}</span>
+      <span class="pz">${fmt(o.precio)}</span>
+    </label>`).join('');
+}
+function elegirTarifa(i){ coTarifa = coTarifas[i]; pintarTarifas(); pintarResumen(); }
+
+async function provinciaCambio(){
+  const f = document.getElementById('coForm');
+  if(coEntrega !== 'sucursal') return;
+  const sel = f.sucursal;
+  const prov = f.provincia.value;
+  if(!prov){ sel.innerHTML = '<option value="">Elegí una provincia primero</option>'; return; }
+  sel.innerHTML = '<option value="">Buscando sucursales…</option>';
+  try{
+    const r = await fetch('/api/envios?provincia=' + encodeURIComponent(prov));
+    const d = await r.json();
+    sel.innerHTML = (d.sucursales && d.sucursales.length)
+      ? '<option value="">Elegí…</option>' + d.sucursales.map(x =>
+          `<option value="${x.code}">${x.nombre} — ${x.direccion}, ${x.localidad}</option>`).join('')
+      : '<option value="">Escribinos y coordinamos la sucursal</option>';
+  }catch(_){ sel.innerHTML = '<option value="">Escribinos y coordinamos la sucursal</option>'; }
+}
+
+function pintarMedios(){
+  const pct = Math.round(RECARGO_TARJETA * 1000) / 10;
+  const ops = [
+    ['mp','Mercado Pago',
+      `Completás el pago en la pantalla de Mercado Pago.${RECARGO_TARJETA>0?` Tiene un ${String(pct).replace('.',',')}% de recargo.`:''}`],
+    ['transferencia','Transferencia bancaria',
+      'Te damos el alias y nos mandás el comprobante.'],
+  ];
+  document.getElementById('coMedios').innerHTML = ops.map(([v,t,d]) => `
+    <label class="co-op${coMedio===v?' sel':''}" onclick="elegirMedio('${v}')">
+      <input type="radio" name="medio" value="${v}" ${coMedio===v?'checked':''}>
+      <span class="t">${t}<small>${d}</small></span>
+    </label>`).join('');
+}
+
+function elegirMedio(v){
+  coMedio = v;
+  pintarMedios();
+  document.getElementById('coTransfBox').classList.toggle('co-oculto', v !== 'transferencia');
+  const btn = document.getElementById('coPagar');
+  btn.textContent = v === 'transferencia' ? 'Confirmar pedido' : 'Pagar con Mercado Pago';
+  document.getElementById('coAvisoPago').classList.toggle('co-oculto', v === 'transferencia');
+  if(v === 'transferencia') pintarDatosTransf();
+  pintarResumen();
+}
+
+function pintarDatosTransf(){
+  const filas = [
+    ['Titular', TRANSFERENCIA.titular, false],
+    ['Alias',   TRANSFERENCIA.alias,   true],
+    ['CVU',     TRANSFERENCIA.cvu,     true],
+    ['Banco',   TRANSFERENCIA.banco,   false],
+  ].filter(([,v]) => v);
+  document.getElementById('coDatosTransf').innerHTML = filas.map(([k,v,copiable]) => `
+    <div class="co-dato">
+      <span class="k">${k}</span>
+      <span class="v">${v}</span>
+      ${copiable ? `<button type="button" class="co-copiar" onclick="copiar('${v}')">Copiar</button>` : ''}
+    </div>`).join('');
+}
+
+function copiar(txt){
+  navigator.clipboard?.writeText(txt).then(
+    () => toast('Copiado'),
+    () => toast('No se pudo copiar, anotalo a mano')
+  );
+}
+
+function pintarResumen(){
+  document.getElementById('coLineas').innerHTML = cart.map(x => `
+    <div class="co-res-row">
+      <span>${x.qty} × ${x.name}<small>${x.mat}${x.talle && x.talle!=='Único' ? ` · talle ${x.talle}` : ''}</small></span>
+      <span>${fmt(x.qty * x.price)}</span>
+    </div>`).join('');
+  const sub = subtotalCarrito(), env = costoEnvio(), rec = recargoTarjeta();
+  document.getElementById('coSubtotal').textContent = fmt(sub);
+  document.getElementById('coEnvioMonto').textContent =
+    coEntrega === 'retiro' ? 'Sin cargo' : (coTarifa ? fmt(env) : 'A calcular');
+  document.getElementById('coFilaRecargo').classList.toggle('co-oculto', rec <= 0);
+  document.getElementById('coRecargoMonto').textContent = fmt(rec);
+  document.getElementById('coTotal').textContent = fmt(totalPedido());
+}
+
+function coFallo(msg){
+  const e = document.getElementById('coError');
+  e.textContent = msg; e.classList.add('show');
+  document.getElementById('coPagar').disabled = false;
+  document.getElementById('coPagar').textContent = 'Pagar con Mercado Pago';
+}
+
+async function pagar(ev){
+  ev.preventDefault();
+  const f = document.getElementById('coForm');
+  document.getElementById('coError').classList.remove('show');
+
+  if(coEntrega !== 'retiro' && !coTarifa){ coFallo('Escribí tu código postal para calcular el envío.'); return false; }
+  if(coEntrega === 'domicilio' && (!f.calle.value.trim() || !f.numero.value.trim())){
+    coFallo('Completá la calle y el número.'); return false;
+  }
+
+  const btn = document.getElementById('coPagar');
+
+  /* ── Transferencia: no pasa por Mercado Pago ── */
+  if(coMedio === 'transferencia'){
+    const lineas = cart.map(x =>
+      `• ${x.qty}x ${x.name} (${x.mat}${x.talle && x.talle!=='Único' ? ` · talle ${x.talle}` : ''})`
+    ).join('%0A');
+    const entrega = coEntrega === 'retiro' ? 'Retiro en persona'
+      : coEntrega === 'sucursal'
+        ? `Sucursal: ${f.sucursal.selectedOptions[0]?.text || '(a definir)'}`
+        : `Domicilio: ${f.calle.value} ${f.numero.value}${f.piso.value?' '+f.piso.value:''}, ${f.localidad.value} (CP ${f.cp.value})`;
+    const msg =
+      `Hola Ofelia St! Hice un pedido desde la web y voy a pagar por transferencia.%0A%0A` +
+      `${lineas}%0A%0A` +
+      `Envío: ${entrega}${costoEnvio()?` — ${fmt(costoEnvio())}`:''}%0A` +
+      `TOTAL: ${fmt(totalPedido())}%0A%0A` +
+      `Mis datos: ${f.nombre.value}, ${f.telefono.value}, ${f.email.value}%0A` +
+      `Ahora te mando el comprobante.`;
+    window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, '_blank');
+    toast('Te abrimos WhatsApp para confirmar el pedido');
+    return false;
+  }
+
+  btn.disabled = true; btn.textContent = 'Preparando el pago…';
+
+  const cuerpo = {
+    recargo: recargoTarjeta(),
+    items: cart.map(x => ({ id:x.id, qty:x.qty, talle:x.talle })),
+    envio: {
+      modo: coEntrega,
+      nombre: coTarifa ? coTarifa.nombre : 'Retiro en persona',
+      precio: costoEnvio(),
+      cp: f.cp.value || '',
+      provincia: f.provincia.value || '',
+      localidad: f.localidad.value || '',
+      calle: f.calle.value || '',
+      numero: f.numero.value || '',
+      piso: f.piso.value || '',
+      sucursal: f.sucursal ? (f.sucursal.selectedOptions[0]?.text || '') : ''
+    },
+    comprador: {
+      nombre: f.nombre.value.trim(),
+      email: f.email.value.trim(),
+      telefono: f.telefono.value.trim(),
+      dni: f.dni.value.trim()
+    }
+  };
+
+  try{
+    const r = await fetch('/api/checkout', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cuerpo)
+    });
+    const d = await r.json();
+    if(d.url){ sessionStorage.setItem('ofelia_ref', d.ref || ''); location.href = d.url; return false; }
+    const motivos = {
+      mp_sin_configurar:'El pago online todavía no está activo. Escribinos por WhatsApp y lo cerramos por ahí.',
+      sin_stock:'Se quedó sin stock una de las piezas mientras comprabas. Sacala del carrito y probá de nuevo.',
+      pieza_inexistente:'Una de las piezas ya no está disponible.',
+      sin_precio:'Una de las piezas no tiene precio cargado. Escribinos y lo resolvemos.',
+      carrito_vacio:'Tu carrito está vacío.',
+      faltan_datos:'Faltan tu nombre o tu email.'
+    };
+    coFallo(motivos[d.error] || 'No pudimos iniciar el pago. Probá de nuevo en un minuto.');
+  }catch(_){
+    coFallo('No pudimos conectarnos. Revisá tu conexión y probá de nuevo.');
+  }
+  return false;
+}
+
+/* Vuelta desde Mercado Pago */
+(function avisoPago(){
+  const q = new URLSearchParams(location.search);
+  const estado = q.get('pago');
+  if(!estado) return;
+  const ref = q.get('ref') || '';
+  const msg = {
+    ok:        `¡Listo! Recibimos tu pago. Pedido ${ref}. Te escribimos por email.`,
+    pendiente: `Tu pago quedó pendiente de acreditación. Pedido ${ref}.`,
+    error:     'El pago no se pudo completar. No te cobramos nada.'
+  }[estado];
+  if(!msg) return;
+  if(estado === 'ok') cart = [];
+  history.replaceState({}, '', location.pathname);
+  setTimeout(() => { renderCart(); toast(msg); }, 600);
+})();
 
 /* ═══════════════════════════════════════════════════════════════
    Formulario y toast
@@ -2686,5 +3037,82 @@ function toast(msg){
 
 cargar();
 </script>
+
+<!-- ══ Checkout ══ -->
+<div class="pantalla" id="pantallaCheckout">
+  <div class="pantalla-inner">
+    <button class="pantalla-close" onclick="cerrarCheckout()" aria-label="Cerrar">&times;</button>
+    <span class="label">Ofelia St</span>
+    <h2>Finalizar compra</h2>
+    <p class="pantalla-sub">Completá tus datos y elegí cómo querés recibir el pedido.</p>
+
+    <div class="co-grid">
+      <form class="co-form" id="coForm" onsubmit="return pagar(event)" autocomplete="on">
+        <h3 class="pantalla-h3">Tus datos</h3>
+        <div class="co-fila">
+          <label>Nombre y apellido<input name="nombre" required autocomplete="name"></label>
+          <label>Email<input name="email" type="email" required autocomplete="email"></label>
+        </div>
+        <div class="co-fila">
+          <label>Teléfono<input name="telefono" required inputmode="tel" autocomplete="tel"></label>
+          <label>DNI<input name="dni" inputmode="numeric" autocomplete="off"></label>
+        </div>
+
+        <h3 class="pantalla-h3">Entrega</h3>
+        <div class="co-ops" id="coEntrega"></div>
+
+        <div id="coCamposEnvio" class="co-oculto">
+          <div class="co-fila">
+            <label>Código postal<input name="cp" inputmode="numeric" autocomplete="postal-code" oninput="cpCambio()"></label>
+            <label>Provincia
+              <select name="provincia" onchange="provinciaCambio()"></select>
+            </label>
+          </div>
+          <div id="coDomicilio" class="co-oculto">
+            <div class="co-fila">
+              <label>Localidad<input name="localidad" autocomplete="address-level2"></label>
+              <label>Calle<input name="calle" autocomplete="address-line1"></label>
+            </div>
+            <div class="co-fila">
+              <label>Número<input name="numero" inputmode="numeric"></label>
+              <label>Piso / depto <span style="opacity:.55">(opcional)</span><input name="piso"></label>
+            </div>
+          </div>
+          <div id="coSucursal" class="co-oculto">
+            <label>Sucursal de Correo
+              <select name="sucursal"><option value="">Elegí una provincia primero</option></select>
+            </label>
+          </div>
+        </div>
+
+        <h3 class="pantalla-h3" id="coTituloEnvio" style="display:none">Costo del envío</h3>
+        <div class="co-ops" id="coTarifas"></div>
+
+        <h3 class="pantalla-h3">Cómo querés pagar</h3>
+        <div class="co-ops" id="coMedios"></div>
+
+        <div id="coTransfBox" class="co-oculto">
+          <div class="co-datos" id="coDatosTransf"></div>
+          <p class="co-aviso">Transferí el total desde tu banco o desde Mercado Pago y mandanos el comprobante por WhatsApp. Guardamos tu pedido 24 horas hasta que llegue.</p>
+        </div>
+
+        <div class="co-error" id="coError"></div>
+        <button type="submit" class="btn full" id="coPagar" style="margin-top:8px">Pagar con Mercado Pago</button>
+        <p class="co-aviso" id="coAvisoPago">Vas a completar el pago en la pantalla segura de Mercado Pago.</p>
+      </form>
+
+      <aside class="co-resumen">
+        <h3 class="pantalla-h3" style="margin-top:0">Tu pedido</h3>
+        <div id="coLineas"></div>
+        <div class="co-res-sep"></div>
+        <div class="co-res-row"><span>Subtotal</span><span id="coSubtotal">$0</span></div>
+        <div class="co-res-row"><span>Envío</span><span id="coEnvioMonto">A calcular</span></div>
+        <div class="co-res-row co-oculto" id="coFilaRecargo"><span>Costo de pago</span><span id="coRecargoMonto">$0</span></div>
+        <div class="co-res-sep"></div>
+        <div class="co-res-total"><span>Total</span><span id="coTotal">$0</span></div>
+      </aside>
+    </div>
+  </div>
+</div>
 </body>
 </html>

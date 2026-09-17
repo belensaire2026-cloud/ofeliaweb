@@ -1,0 +1,70 @@
+CHECKOUT DE OFELIA ST — qué hay que configurar
+===============================================
+
+La web ya tiene carrito, pantalla de compra y envíos. Lo único que
+falta son las credenciales. Van cargadas en Cloudflare como
+"variables de entorno", NUNCA escritas dentro de index.html.
+
+Cloudflare → tu proyecto → Settings → Environment variables
+
+
+1) MERCADO PAGO  (para poder cobrar)
+------------------------------------
+  MP_ACCESS_TOKEN   ← marcala como "Secret" / "Encrypt"
+  SITE_URL          ← https://tudominio.com  (sin barra al final)
+
+  De dónde sale el access token:
+  mercadopago.com.ar/developers → Tus integraciones → Crear aplicación
+  → Credenciales de producción → Access Token.
+  Ese valor no se lo mandes a nadie, ni por mail ni por WhatsApp.
+  Se pega directo en Cloudflare.
+
+  Mientras MP_ACCESS_TOKEN no esté cargada, el botón de pagar avisa
+  que el pago online todavía no está activo. No rompe nada.
+
+
+2) CORREO ARGENTINO  (para calcular el envío)
+---------------------------------------------
+  CORREO_USER_TOKEN
+  CORREO_PASSWORD_TOKEN
+  CORREO_CUSTOMER_ID
+  CORREO_CP_ORIGEN        ← tu código postal, desde donde despachás
+  CORREO_ENTORNO          ← "test" mientras probás, "prod" al salir
+
+  Se piden en correoargentino.com.ar → MiCorreo → Integrate a PAQ.AR.
+  Te habilitan primero un usuario de prueba y después uno real.
+
+  Mientras no estén cargadas, la web cotiza con estas tarifas fijas
+  (se cambian en functions/api/envios.js, arriba de todo):
+      a sucursal   $6.500
+      a domicilio  $8.500
+
+
+3) SI ALGO SALE MAL DESPUES DEL PUSH
+------------------------------------
+  El archivo wrangler.jsonc es el que le dice a Cloudflare cómo
+  publicar la web. Si después de subirlo la página deja de verse:
+    - Cloudflare → tu proyecto → Deployments → "Rollback" a la
+      versión anterior. Vuelve a andar al instante.
+    - Y avisame, que lo arreglo.
+  El nombre que dice "name" en wrangler.jsonc TIENE que ser igual
+  al del proyecto en Cloudflare. Si no coincide, no se actualiza.
+
+
+4) PROBAR
+---------
+  - Agregá algo al carrito y entrá a "Finalizar compra".
+  - Con "Retiro en persona" el envío es $0.
+  - Con domicilio o sucursal, escribí un CP y fijate que aparezca
+    el precio del envío.
+  - Con MP en modo prueba, usá las tarjetas de test de Mercado Pago.
+
+
+ALGO IMPORTANTE SOBRE LOS PRECIOS
+---------------------------------
+El precio nunca se toma de lo que manda el navegador: antes de cobrar,
+el servidor vuelve a leer tu planilla publicada y valida precio y
+stock de cada pieza. Si alguien intenta cambiar el precio desde la
+consola del navegador, el pago se rechaza.
+Esto significa que LA PLANILLA MANDA. Si un precio está mal ahí,
+está mal en el cobro.

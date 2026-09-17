@@ -1,0 +1,14 @@
+{
+  // Configuración del Worker de Ofelia St.
+  // El nombre TIENE que coincidir con el del proyecto en Cloudflare.
+  "name": "ofeliastudio",
+  "main": "./src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    // La web (index.html, fotos/, marca/) se sirve desde la raíz del repo.
+    "directory": "./",
+    "binding": "ASSETS",
+    // Solo /api/* pasa por el código; el resto va derecho a los archivos.
+    "run_worker_first": ["/api/*"]
+  }
+}

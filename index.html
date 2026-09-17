@@ -3040,9 +3040,14 @@ async function pagar(ev){
       pieza_inexistente:'Una de las piezas ya no está disponible.',
       sin_precio:'Una de las piezas no tiene precio cargado. Escribinos y lo resolvemos.',
       carrito_vacio:'Tu carrito está vacío.',
-      faltan_datos:'Faltan tu nombre o tu email.'
+      faltan_datos:'Faltan tu nombre o tu email.',
+      catalogo:'No pudimos leer el catálogo en este momento. Esperá unos segundos y probá otra vez.',
+      mp:'Mercado Pago rechazó el pedido. Probá de nuevo; si sigue, escribinos por WhatsApp.',
+      metodo:'Hubo un problema técnico. Probá de nuevo.',
+      json:'Hubo un problema técnico. Probá de nuevo.'
     };
-    coFallo(motivos[d.error] || 'No pudimos iniciar el pago. Probá de nuevo en un minuto.');
+    coFallo((motivos[d.error] || 'No pudimos iniciar el pago. Probá de nuevo en un minuto.')
+            + (d.error ? ` (${d.error})` : ''));
   }catch(_){
     coFallo('No pudimos conectarnos. Revisá tu conexión y probá de nuevo.');
   }

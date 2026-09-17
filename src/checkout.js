@@ -42,8 +42,16 @@ const plata = s => Number(String(s||'').replace(/[^\d]/g,'')) || 0;
 
 /* Catálogo real, con precio y stock, leído de la planilla. */
 async function catalogo(){
-  const r = await fetch(SHEET_CSV + '&cb=' + Math.floor(Date.now()/60000));
-  if(!r.ok) throw new Error('planilla');
+  /* Google a veces tarda o corta. Reintentamos antes de darnos por vencidos. */
+  let r = null;
+  for(let i = 0; i < 3; i++){
+    try{
+      r = await fetch(SHEET_CSV + '&cb=' + Math.floor(Date.now()/60000));
+      if(r.ok) break;
+    }catch(_){ r = null; }
+    await new Promise(x => setTimeout(x, 400 * (i + 1)));
+  }
+  if(!r || !r.ok) throw new Error('planilla');
   const filas = parseCSV(await r.text());
   const iHead = filas.findIndex(f => /^producto$/i.test((f[0]||'').trim()));
   const mapa = new Map();

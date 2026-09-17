@@ -108,30 +108,24 @@ export async function crearPago(request, env){
   const site = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
   const dos  = n => (Math.round(n * 100) / 100).toFixed(2);
 
-  /* Orders API: los items van con importes en texto y con dos decimales.
-     El envío y el recargo se suman como líneas más. */
-  const lineas = mpItems.map(i => ({
-    title: i.title,
-    description: i.description,
-    quantity: i.quantity,
-    unit_price: dos(i.unit_price),
-    total_amount: dos(i.unit_price * i.quantity),
-    unit_measure: 'unit'
-  }));
+  /* Orders API: los items aceptan solo title, description,
+     quantity y unit_price. Nada de total_amount ni unit_measure. */
+  const lineas = mpItems.map(i => {
+    const it = { title: i.title, quantity: i.quantity, unit_price: dos(i.unit_price) };
+    if (i.description) it.description = i.description;
+    return it;
+  });
   if (costoEnvio > 0) lineas.push({
-    title: envio.nombre || 'Envío', quantity: 1,
-    unit_price: dos(costoEnvio), total_amount: dos(costoEnvio), unit_measure: 'unit'
+    title: envio.nombre || 'Envío', quantity: 1, unit_price: dos(costoEnvio)
   });
   if (recargo > 0) lineas.push({
-    title: 'Costo de pago', quantity: 1,
-    unit_price: dos(recargo), total_amount: dos(recargo), unit_measure: 'unit'
+    title: 'Costo de pago', quantity: 1, unit_price: dos(recargo)
   });
 
   const total = subtotal + costoEnvio + recargo;
 
-  const armarOrden = modo => ({
+  const base = {
     type: 'online',
-    processing_mode: modo,
     total_amount: dos(total),
     external_reference: ref,
     payer: {
@@ -149,35 +143,44 @@ export async function crearPago(request, env){
         auto_return: 'approved'
       }
     }
-  });
+  };
 
-  const intentar = async modo => {
+  /* Mercado Pago cambió el formato y la documentación no es clara,
+     así que probamos las variantes que acepta, en orden.          */
+  const variantes = [
+    { nombre:'automatic+transactions', cuerpo: { ...base, processing_mode:'automatic',
+        transactions: { payments: [ { amount: dos(total) } ] } } },
+    { nombre:'manual', cuerpo: { ...base, processing_mode:'manual' } },
+    { nombre:'manual+transactions', cuerpo: { ...base, processing_mode:'manual',
+        transactions: { payments: [ { amount: dos(total) } ] } } },
+    { nombre:'sin-processing-mode', cuerpo: { ...base,
+        transactions: { payments: [ { amount: dos(total) } ] } } },
+  ];
+
+  const intentar = async v => {
     const r = await fetch('https://api.mercadopago.com/v1/orders', {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN,
         'Content-Type': 'application/json',
         accept: 'application/json',
-        'X-Idempotency-Key': ref + '-' + modo + '-' + crypto.randomUUID()
+        'X-Idempotency-Key': ref + '-' + v.nombre + '-' + crypto.randomUUID()
       },
-      body: JSON.stringify(armarOrden(modo))
+      body: JSON.stringify(v.cuerpo)
     });
     const txt = await r.text();
     let d = null; try { d = JSON.parse(txt); } catch (_) {}
-    return { ok: r.ok, status: r.status, d, txt };
+    return { nombre: v.nombre, ok: r.ok, status: r.status, d, txt };
   };
 
-  let res = await intentar('automatic');
-  if (!res.ok || !res.d || !res.d.checkout_url) {
-    const alt = await intentar('manual');
-    if (alt.ok && alt.d && alt.d.checkout_url) res = alt;
-    else return json({
-      error: 'mp',
-      detalle: 'Mercado Pago rechazo la orden',
-      automatic: { status: res.status, cuerpo: res.txt.slice(0, 700) },
-      manual:    { status: alt.status, cuerpo: alt.txt.slice(0, 700) }
-    }, 502);
+  const fallos = [];
+  for (const v of variantes) {
+    const res = await intentar(v);
+    if (res.ok && res.d && res.d.checkout_url) {
+      return json({ ref, url: res.d.checkout_url, variante: res.nombre });
+    }
+    fallos.push({ variante: res.nombre, status: res.status, cuerpo: res.txt.slice(0, 500) });
   }
 
-  return json({ ref, url: res.d.checkout_url });
+  return json({ error:'mp', detalle:'Mercado Pago rechazo la orden', fallos }, 502);
 }

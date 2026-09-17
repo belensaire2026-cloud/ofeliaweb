@@ -148,9 +148,12 @@ export async function crearPago(request, env){
   /* Mercado Pago cambió el formato y la documentación no es clara,
      así que probamos las variantes que acepta, en orden.          */
   const variantes = [
+    /* 'manual' es el que Mercado Pago acepta hoy: va primero para no
+       gastar un pedido de más en cada compra. Los otros quedan de
+       respaldo por si algun dia cambian la API otra vez.           */
+    { nombre:'manual', cuerpo: { ...base, processing_mode:'manual' } },
     { nombre:'automatic+transactions', cuerpo: { ...base, processing_mode:'automatic',
         transactions: { payments: [ { amount: dos(total) } ] } } },
-    { nombre:'manual', cuerpo: { ...base, processing_mode:'manual' } },
     { nombre:'manual+transactions', cuerpo: { ...base, processing_mode:'manual',
         transactions: { payments: [ { amount: dos(total) } ] } } },
     { nombre:'sin-processing-mode', cuerpo: { ...base,

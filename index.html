@@ -926,6 +926,39 @@
   footer img{height:38px; opacity:.8; margin-bottom:14px;}
   footer .label{opacity:.6; font-size:.62rem;}
 
+  /* ── Avisito de "agregado al carrito" ────── */
+  .agregado{
+    position:fixed; inset:0; z-index:470;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(51,28,20,.34);
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .agregado.open{opacity:1; pointer-events:auto;}
+  .agregado-card{
+    background:var(--crema-pale); border:1px solid var(--line); border-radius:6px;
+    padding:30px 32px 26px; width:min(420px, calc(100vw - 36px));
+    box-shadow:0 22px 50px var(--shadow); text-align:center;
+    transform:translateY(14px) scale(.98); transition:transform .28s cubic-bezier(.4,1.4,.5,1);
+  }
+  .agregado.open .agregado-card{transform:none;}
+  .agregado-tilde{
+    width:42px; height:42px; margin:0 auto 14px; border-radius:50%;
+    border:1px solid var(--choco); display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; color:var(--choco);
+  }
+  .agregado-card .n{font-size:1.16rem; line-height:1.35; display:block;}
+  .agregado-card .n small{display:block; font-size:.8rem; opacity:.6; margin-top:4px;}
+  .agregado-card .q{
+    font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+    opacity:.55; margin:16px 0 20px;
+  }
+  .agregado-btns{display:flex; flex-direction:column; gap:10px;}
+  .agregado-btns .btn{padding:14px 20px; width:100%; text-align:center;}
+  .agregado-btns .btn.ghost{
+    background:transparent; color:var(--choco); border-color:var(--line);
+  }
+  .agregado-btns .btn.ghost:hover{border-color:var(--choco); transform:none;}
+
   .toast{
     position:fixed; bottom:26px; left:50%;
     transform:translate(-50%, 100px);
@@ -2663,8 +2696,26 @@ function addToCart(id, talle){
   } else cart.push({...p, clave, talle, qty:1});
 
   renderCart();
-  toast(p.name + (talle !== 'Único' ? ` · talle ${talle}` : '') + ' agregado');
+  avisoAgregado(p, talle);
 }
+/* Avisito con las dos salidas: seguir mirando o ir a pagar. */
+function avisoAgregado(p, talle){
+  document.getElementById('agregadoNombre').innerHTML =
+    p.name + `<small>${p.mat}${talle && talle !== 'Único' ? ` · talle ${talle}` : ''}</small>`;
+  document.getElementById('agregado').classList.add('open');
+}
+function cerrarAviso(){ document.getElementById('agregado').classList.remove('open'); }
+
+function seguirComprando(){
+  cerrarAviso();
+  if(lbProd) cerrarProducto();     // vuelve a la galería, en el mismo lugar
+}
+function irAlCheckout(){
+  cerrarAviso();
+  if(lbProd) cerrarProducto();
+  checkout();
+}
+
 function changeQty(clave, d){
   const row = cart.find(x => x.clave === clave);
   if(!row) return;
@@ -2718,9 +2769,9 @@ const PROVINCIAS = [
    Los datos de transferencia se muestran tal cual acá.        */
 const RECARGO_TARJETA = 0;
 const TRANSFERENCIA = {
-  titular: 'Sintia Marisa Simonetti',
-  alias:   'Sintiasimonetti',
-  cvu:     '',          // ← pegá acá tu CVU y aparece solo
+  titular: 'Belén Saire',
+  alias:   'belu.saire',
+  cvu:     '0000003100089686528208',
   banco:   'Mercado Pago'
 };
 
@@ -3026,6 +3077,16 @@ function sendMail(e, form){
   toast('Abriendo tu correo…');
   form.reset();
 }
+/* El avisito vive al final del HTML, después de este script, así que
+   escuchamos en document y lo buscamos recién cuando hay un click. */
+document.addEventListener('click', e => {
+  if(e.target && e.target.id === 'agregado') seguirComprando();
+});
+document.addEventListener('keydown', e => {
+  const a = document.getElementById('agregado');
+  if(e.key === 'Escape' && a && a.classList.contains('open')) seguirComprando();
+});
+
 let toastTimer;
 function toast(msg){
   const t = document.getElementById('toast');
@@ -3111,6 +3172,19 @@ cargar();
         <div class="co-res-sep"></div>
         <div class="co-res-total"><span>Total</span><span id="coTotal">$0</span></div>
       </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Agregado al carrito ══ -->
+<div class="agregado" id="agregado" role="dialog" aria-live="polite">
+  <div class="agregado-card">
+    <div class="agregado-tilde">&#10003;</div>
+    <span class="n" id="agregadoNombre"></span>
+    <div class="q">Agregado a tu carrito</div>
+    <div class="agregado-btns">
+      <button type="button" class="btn" onclick="irAlCheckout()">Finalizar compra</button>
+      <button type="button" class="btn ghost" onclick="seguirComprando()">Seguir comprando</button>
     </div>
   </div>
 </div>

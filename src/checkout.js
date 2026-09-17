@@ -129,9 +129,9 @@ export async function crearPago(request, env){
 
   const total = subtotal + costoEnvio + recargo;
 
-  const orden = {
+  const armarOrden = modo => ({
     type: 'online',
-    processing_mode: 'automatic',
+    processing_mode: modo,
     total_amount: dos(total),
     external_reference: ref,
     payer: {
@@ -149,22 +149,35 @@ export async function crearPago(request, env){
         auto_return: 'approved'
       }
     }
+  });
+
+  const intentar = async modo => {
+    const r = await fetch('https://api.mercadopago.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        'X-Idempotency-Key': ref + '-' + modo + '-' + crypto.randomUUID()
+      },
+      body: JSON.stringify(armarOrden(modo))
+    });
+    const txt = await r.text();
+    let d = null; try { d = JSON.parse(txt); } catch (_) {}
+    return { ok: r.ok, status: r.status, d, txt };
   };
 
-  const r = await fetch('https://api.mercadopago.com/v1/orders', {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN,
-      'Content-Type': 'application/json',
-      accept: 'application/json',
-      'X-Idempotency-Key': ref + '-' + crypto.randomUUID()
-    },
-    body: JSON.stringify(orden)
-  });
-  const d = await r.json();
-  if (!r.ok || !d.checkout_url) {
-    return json({ error: 'mp', detalle: d.message || d.error || 'desconocido' }, 502);
+  let res = await intentar('automatic');
+  if (!res.ok || !res.d || !res.d.checkout_url) {
+    const alt = await intentar('manual');
+    if (alt.ok && alt.d && alt.d.checkout_url) res = alt;
+    else return json({
+      error: 'mp',
+      detalle: 'Mercado Pago rechazo la orden',
+      automatic: { status: res.status, cuerpo: res.txt.slice(0, 700) },
+      manual:    { status: alt.status, cuerpo: alt.txt.slice(0, 700) }
+    }, 502);
   }
 
-  return json({ ref, url: d.checkout_url });
+  return json({ ref, url: res.d.checkout_url });
 }

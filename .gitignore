@@ -1,0 +1,4 @@
+# Carpetas de trabajo: no van a la web ni al repositorio.
+_to_delete/
+Claude outputs/
+node_modules/

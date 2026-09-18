@@ -2800,7 +2800,7 @@ function abrirCheckout(){
       PROVINCIAS.map(([c,n]) => `<option value="${c}">${n}</option>`).join('');
   }
   pintarEntrega();
-  pintarMedios();
+  pintarMediosPago();
   pintarResumen();
   document.getElementById('pantallaCheckout').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2900,7 +2900,7 @@ async function provinciaCambio(){
   }catch(_){ sel.innerHTML = '<option value="">Escribinos y coordinamos la sucursal</option>'; }
 }
 
-function pintarMedios(){
+function pintarMediosPago(){
   const pct = Math.round(RECARGO_TARJETA * 1000) / 10;
   const ops = [
     ['mp','Mercado Pago',
@@ -2917,7 +2917,7 @@ function pintarMedios(){
 
 function elegirMedio(v){
   coMedio = v;
-  pintarMedios();
+  pintarMediosPago();
   document.getElementById('coTransfBox').classList.toggle('co-oculto', v !== 'transferencia');
   const btn = document.getElementById('coPagar');
   btn.textContent = v === 'transferencia' ? 'Confirmar pedido' : 'Pagar con Mercado Pago';

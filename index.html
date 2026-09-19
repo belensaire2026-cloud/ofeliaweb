@@ -1322,6 +1322,9 @@ const SIN_REPOSICION = new Set([
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
+  'collar-nina-boho-collection',
+  'collar-nova-boho-collection',
+  'collar-duna-boho-collection',
   'anillos-corazones-iii-plata-925',
   'anillo-cala-acero-dorado',
   'anillo-luna-acero-inoxidable',
@@ -1445,6 +1448,7 @@ const SWATCHES = {
   'acero dorado':       'linear-gradient(140deg,#f3e0b5,#d9b46a 55%,#b08a3e)',
   'acero inoxidable':   'linear-gradient(140deg,#dfe2e5,#a9aeb3 55%,#7d8287)',
   'acero quirúrgico':   'linear-gradient(140deg,#dfe2e5,#a9aeb3 55%,#7d8287)',
+  'boho collection':    'linear-gradient(140deg,#e7d3bf,#c9a882 55%,#a8815a)',
 };
 const SWATCH_DEFAULT = 'linear-gradient(140deg,#e6d5c4,#cdb09a)';
 const swatchOf = m => SWATCHES[(m||'').toLowerCase().trim()] || SWATCH_DEFAULT;
@@ -1459,6 +1463,29 @@ const swatchOf = m => SWATCHES[(m||'').toLowerCase().trim()] || SWATCH_DEFAULT;
    No hay que cargar nada en la planilla: sale del nombre del
    material. Si aparece uno que no está acá, usa el genérico.     */
 const INFO_MATERIALES = {
+
+  'boho collection': {
+    material:
+      'Mostacilla de vidrio, cuerda encerada y apliques con baño de oro.',
+    materialLargo:
+      'Las piezas de la Boho Collection están armadas a mano, hilo por hilo: mostacilla de vidrio, '
+      + 'cuerda encerada y apliques con baño de oro. No son de metal macizo como el resto del '
+      + 'catálogo, y ahí está la gracia — son livianas, se sienten distinto y están pensadas para '
+      + 'usarse en capas, una encima de la otra.\n\n'
+      + 'Como cada pieza se enhebra a mano, no hay dos exactamente iguales: la posición de los '
+      + 'colores cambia un poco de una a otra. Eso no es una falla, es parte de cómo están hechas.',
+    cuidado:
+      'Sacátela para bañarte y para el mar o la pileta: el agua es lo que más castiga la cuerda y '
+      + 'el baño de los apliques. Guardala estirada, sin doblar ni tironear del hilo.',
+    cuidadoLargo:
+      'El agua es el cuidado principal. Sacátela antes de bañarte y antes de meterte al mar o a la '
+      + 'pileta: el cloro y la sal resecan la cuerda encerada y desgastan el baño de los apliques '
+      + 'mucho más rápido que el uso de todos los días.\n\n'
+      + 'Perfume, crema y protector solar siempre antes de ponértela, nunca encima. La cuerda '
+      + 'absorbe los productos y con el tiempo se mancha.\n\n'
+      + 'Cuando no la uses, guardala estirada en su bolsita, sin enrollarla apretada. Y no tironees '
+      + 'del hilo para acomodarla: si te queda torcida, deslizá las mostacillas con los dedos.',
+  },
 
   'plata 925': {
     material:
@@ -1630,7 +1657,7 @@ const catKey   = c => catLabel(c).toLowerCase();
 
    Si en la planilla aparece un material o una categoría que no esté
    en estas listas, se agrega solo al final.                          */
-const MATERIALES_FIJOS = ['Plata 925', 'Acero blanco'];
+const MATERIALES_FIJOS = ['Plata 925', 'Acero blanco', 'Boho Collection'];
 const CATEGORIAS_FIJAS = ['anillos', 'collares', 'pulseras', 'aros'];
 
 /* Copia de respaldo: si la planilla no responde, la web usa esto. */

@@ -1,3 +1,7 @@
+.github
+.gitignore
+.git/
+.git
 src
 functions
 node_modules

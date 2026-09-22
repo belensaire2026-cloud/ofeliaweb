@@ -2181,9 +2181,32 @@ function mensajeVacio(){
 /* Orden de los materiales cuando la vista está en "Sugeridos":
    primero el dorado y la plata mezclados, después el inoxidable y
    por último el acero blanco.                                     */
+/* En "Sugeridos" la Boho Collection va intercalada con la plata y el
+   acero dorado (una de cada una, por turnos), así la grilla no queda
+   en bloques por material. Lo demás sigue en su orden de siempre.  */
+function intercalar(list){
+  const fam = p => {
+    const s = (p.mat || '').toLowerCase().trim();
+    if(s.startsWith('boho')) return 'boho';
+    if(s.startsWith('plata')) return 'plata';
+    if(s.startsWith('acero dorado') || s.startsWith('acero chapado')) return 'dorado';
+    return null;
+  };
+  const entra = p => p.stock > 0 && fam(p);
+  const grupos = { boho: [], plata: [], dorado: [] };
+  list.filter(entra).forEach(p => grupos[fam(p)].push(p));
+  const total = grupos.boho.length + grupos.plata.length + grupos.dorado.length;
+  const mezcla = [];
+  for(let i = 0; mezcla.length < total; i++)
+    for(const k of ['boho', 'plata', 'dorado'])
+      if(grupos[k][i]) mezcla.push(grupos[k][i]);
+  return [...mezcla, ...list.filter(p => !entra(p))];
+}
+
 function rangoMaterial(m){
   const s = (m || '').toLowerCase().trim();
   if(s.startsWith('acero dorado') || s.startsWith('acero chapado') || s.startsWith('plata')) return 0;
+  if(s.startsWith('boho')) return 0;
   if(s.startsWith('acero inox')) return 1;
   if(s.startsWith('acero blanco')) return 2;
   return 3;
@@ -2244,6 +2267,7 @@ function renderGrid(){
   const cmp = ORDENES[orden];
   list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) ||
     (cmp ? cmp(a,b) : rangoMaterial(a.mat) - rangoMaterial(b.mat)));
+  if(!cmp && current.mat === 'all') list = intercalar(list);
 
   document.getElementById('ordenFila').style.display = '';
   document.getElementById('gridBarra').className = 'grid-barra';

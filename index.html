@@ -1348,22 +1348,13 @@ const CON_FOTO = new Set([
   'aros-capri-blanco-acero-dorado',
   'aros-halo-n-2-14-mm-plata-925',
   'cubic-mini-cuadrado-plata-925',
-  'argollita-duna-n-0-acero-blanco',
   'argollita-duna-n-1-acero-blanco',
   'argollitas-caviar-triangulo-acero-blanco',
-  'argollitas-classic-n-1-plata-925',
   'argollitas-classic-n-1-d-acero-dorado',
-  'argollitas-classic-n-2-plata-925',
-  'argollitas-classic-n-3-plata-925',
-  'argollitas-classic-n-4-plata-925',
   'argollitas-classic-n-5-plata-925',
-  'argollitas-marco-10mm-plata-925',
-  'argollitas-gota-acero-blanco',
-  'anillo-circulo-plata-925',
   'anillo-corazon-i-acero-inoxidable',
   'anillo-corazon-ii-plateado-acero-inoxidable',
   'anillo-deriva-plata-925',
-  'anillo-gota-plata-925',
   'anillo-irregular-acero-inoxidable',
   'anillo-mina-acero-inoxidable',
   'anillo-nodo-acero-inoxidable',
@@ -1389,7 +1380,6 @@ const CON_FOTO = new Set([
   'collar-muna-corazon-plata-925',
   'aritos-perlas-4mm-plata-925',
   'cubic-circulo-5mm-plata-925',
-  'cubic-mini-circulo-plata-925',
 ]);
 
 /* Nombre que se muestra en la web, cuando difiere del de la planilla.
@@ -1958,6 +1948,17 @@ const _mirador = ('IntersectionObserver' in window)
     }, {threshold:0.25})
   : null;
 
+/* En la grilla las fotos se ven del tamaño de una estampilla, así que
+   usa la versión liviana (t1.jpg, unos 30 KB) en vez de la grande de
+   1200 px. Si una pieza no tiene su versión chica, usa la de siempre. */
+const _chica = {};
+async function miniatura(url){
+  if(_chica[url] !== undefined) return _chica[url];
+  const liviana = url.replace(/\/\d+\.[a-z0-9]+$/i, '/t1.jpg');
+  _chica[url] = (liviana !== url && await existeImg(liviana)) ? liviana : url;
+  return _chica[url];
+}
+
 /* Rellena los huecos de la galería que estén en pantalla. */
 function pintarMedios(){
   document.querySelectorAll('[data-foto]').forEach(async el => {
@@ -1978,7 +1979,7 @@ function pintarMedios(){
       el.prepend(v);
       if(_mirador) _mirador.observe(v); else v.play().catch(()=>{});
     } else {
-      el.style.background = `url('${m.url}') center/cover`;
+      el.style.background = `url('${await miniatura(m.url)}') center/cover`;
     }
     el.classList.add('con-foto');
     const t = el.querySelector('.ph-texto');

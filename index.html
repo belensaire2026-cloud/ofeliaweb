@@ -1836,16 +1836,13 @@ async function buscarHojaWeb(){
   return null;
 }
 
-async function cargar(){
-  let list = null;
-  if(SHEET_CSV && SHEET_CSV.startsWith('http')){
-    list = await leerCSV(SHEET_CSV);
-    if(list) fuente = 'planilla';
-    else { list = await buscarHojaWeb(); if(list) fuente = 'planilla'; }
-  }
-  if(!list){ list = SNAPSHOT; fuente = 'respaldo'; }
+const CACHE_CAT = 'ofelia_catalogo';
+const CACHE_HORAS = 12;
+
+function aplicar(list, origen){
   TOTAL_FILAS = list.length;
   PRODUCTS = normalizar(list);
+  fuente = origen;
 
   /* Materiales: los fijos primero, después cualquier otro que aparezca
      en la planilla. Si difieren solo en mayúsculas, manda la planilla. */
@@ -1870,10 +1867,49 @@ async function cargar(){
   }
 
   renderMenu(); renderFilters(); renderGrid(); renderCart();
+}
 
-  /* Si alguien entró con un link a una pieza, se la abrimos. */
-  const idInicial = idDeURL();
-  if(idInicial && PRODUCTS.some(x => x.id === idInicial)) abrirProducto(idInicial, true);
+/* Abre lo que pida la dirección: primero el filtro, después la pieza. */
+function abrirDeURL(definitivo){
+  const f = filtroDeURL();
+  if(f && (f.mat !== current.mat || f.cat !== current.cat)) filterBy(f.mat, f.cat, true);
+
+  const id = idDeURL();
+  if(!id) return;
+  if(PRODUCTS.some(x => x.id === id)){
+    if(!lbProd || lbProd.id !== id) abrirProducto(id, true);
+  }else if(definitivo && !lbProd){
+    cerrarProducto(true);
+  }
+}
+
+async function cargar(){
+  /* Primero pintamos con lo último que vimos, guardado en el navegador:
+     la página aparece al instante. Enseguida la refrescamos con la
+     planilla, así los precios y el stock quedan al día.            */
+  let conCache = false;
+  try{
+    const g = JSON.parse(localStorage.getItem(CACHE_CAT) || 'null');
+    if(g && Array.isArray(g.list) && g.list.length &&
+       Date.now() - g.t < CACHE_HORAS*3600*1000){
+      aplicar(g.list, 'planilla');
+      abrirDeURL(false);
+      conCache = true;
+    }
+  }catch(_){ /* si el navegador no deja guardar, seguimos igual */ }
+
+  let list = null;
+  if(SHEET_CSV && SHEET_CSV.startsWith('http')){
+    list = await leerCSV(SHEET_CSV);
+    if(!list) list = await buscarHojaWeb();
+  }
+  if(list){
+    try{ localStorage.setItem(CACHE_CAT, JSON.stringify({t:Date.now(), list})); }catch(_){}
+    aplicar(list, 'planilla');
+  }else if(!conCache){
+    aplicar(SNAPSHOT, 'respaldo');
+  }
+  abrirDeURL(true);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2316,10 +2352,20 @@ function renderGrid(){
         : `⚠ No pudo leer la planilla — está usando la copia de respaldo (${PRODUCTS.length} productos)`);
 }
 
-function filterBy(mat, cat){
+function filterBy(mat, cat, desdeURL){
+  const habiaPieza = !!idDeURL();
   current = {mat, cat};
   visibles = POR_TANDA;
-  renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarTalles(); cerrarProducto();
+  renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarTalles();
+  cerrarProducto(true);            // la dirección la arreglamos acá abajo
+  if(!desdeURL){
+    const h = hashDeFiltro(mat, cat);
+    const destino = location.pathname + location.search + h;
+    /* Si veníamos de una ficha, pisamos esa dirección en vez de
+       agregar una nueva: así "atrás" vuelve a donde estabas.     */
+    if(habiaPieza) history.replaceState({filtro:[mat,cat]}, '', destino);
+    else if(location.hash !== h) history.pushState({filtro:[mat,cat]}, '', destino);
+  }
   document.getElementById('producto').scrollIntoView({behavior:'smooth'});
 }
 function goTo(id){
@@ -2499,6 +2545,31 @@ function lbInfoHTML(p){
    cae directo en esa pieza. El botón "atrás" cierra la ficha.   */
 let urlPropia = false;   // ¿el # que hay ahora lo puso la web al abrir?
 
+/* ── Link directo a un filtro ──────────────────────────────────
+   Elegir material o categoría cambia la dirección del navegador:
+   #/acero-dorado, #/collares, #/acero-dorado/collares.        */
+function hashDeFiltro(mat, cat){
+  const p = [];
+  if(mat !== 'all') p.push(slug(mat));
+  if(cat !== 'all') p.push(slug(cat));
+  return p.length ? '#/' + p.join('/') : '';
+}
+
+function filtroDeURL(){
+  const h = location.hash;
+  if(!h || /^#\/pieza\//.test(h)) return null;
+  const partes = h.replace(/^#\/?/,'').split('/').filter(Boolean);
+  if(!partes.length) return null;
+  let mat = 'all', cat = 'all', sirve = false;
+  for(const t of partes){
+    const c = CATS.find(k => slug(k) === t);
+    if(c){ cat = c; sirve = true; continue; }
+    const m = MATERIALS.find(x => slug(x) === t);
+    if(m){ mat = m; sirve = true; }
+  }
+  return sirve ? {mat, cat} : null;
+}
+
 function idDeURL(){
   const m = location.hash.match(/^#\/pieza\/(.+)$/);
   return m ? decodeURIComponent(m[1]) : null;
@@ -2508,9 +2579,11 @@ window.addEventListener('popstate', () => {
   const id = idDeURL();
   if(id){
     if(!lbProd || lbProd.id !== id) abrirProducto(id, true);
-  }else if(lbProd){
-    cerrarProducto(true);
+    return;
   }
+  if(lbProd) cerrarProducto(true);
+  const f = filtroDeURL() || {mat:'all', cat:'all'};
+  if(f.mat !== current.mat || f.cat !== current.cat) filterBy(f.mat, f.cat, true);
 });
 
 async function abrirProducto(id, desdeURL){
@@ -3167,6 +3240,20 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
+
+/* Si el link apunta a una pieza, mostramos la ficha en el acto y
+   vamos buscando sus fotos mientras se lee la planilla. Cuando
+   llega el catálogo la ficha se completa sola.                  */
+(function adelantarPieza(){
+  const id = idDeURL();
+  if(!id) return;
+  document.getElementById('lbInfo').innerHTML   = '<div class="lb-cargando">cargando…</div>';
+  document.getElementById('lbPuntos').innerHTML = '';
+  document.getElementById('lbMarco').innerHTML  = '<div class="lb-cargando">buscando fotos…</div>';
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  mediosDe({id});          // va llenando la caché en paralelo
+})();
 
 cargar();
 </script>

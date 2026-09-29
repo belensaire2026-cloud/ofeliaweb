@@ -78,6 +78,12 @@ export async function crearPago(request, env){
   if(!Array.isArray(items) || !items.length) return json({ error:'carrito_vacio' }, 400);
   if(!comprador.email || !comprador.nombre)   return json({ error:'faltan_datos' }, 400);
 
+  /* Mercado Pago rechaza el pedido si el mail trae espacios, mayúsculas
+     raras o no tiene forma de mail. Lo limpiamos y avisamos claro.   */
+  const email = String(comprador.email).trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email))
+    return json({ error:'email_invalido' }, 400);
+
   let cat;
   try { cat = await catalogo(); } catch(_){ return json({ error:'catalogo' }, 502); }
 
@@ -114,84 +120,68 @@ export async function crearPago(request, env){
 
   const ref  = 'OF-' + Date.now().toString(36).toUpperCase();
   const site = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
-  const dos  = n => (Math.round(n * 100) / 100).toFixed(2);
 
-  /* Orders API: los items aceptan solo title, description,
-     quantity y unit_price. Nada de total_amount ni unit_measure. */
-  const lineas = mpItems.map(i => {
-    const it = { title: i.title, quantity: i.quantity, unit_price: dos(i.unit_price) };
-    if (i.description) it.description = i.description;
-    return it;
+  /* Checkout Pro clásico: /checkout/preferences devuelve init_point,
+     que es la pantalla de pago a la que mandamos a la compradora.
+     La API nueva de "orders" pide payment_method y no sirve para un
+     pago con redirección, por eso no la usamos.                  */
+  const lineas = mpItems.map(i => ({
+    id: i.id,
+    title: i.title,
+    description: i.description || undefined,
+    quantity: i.quantity,
+    unit_price: i.unit_price,
+    currency_id: 'ARS'
+  }));
+  if(costoEnvio > 0) lineas.push({
+    title: envio.nombre || 'Envío', quantity: 1, unit_price: costoEnvio, currency_id: 'ARS'
   });
-  if (costoEnvio > 0) lineas.push({
-    title: envio.nombre || 'Envío', quantity: 1, unit_price: dos(costoEnvio)
-  });
-  if (recargo > 0) lineas.push({
-    title: 'Costo de pago', quantity: 1, unit_price: dos(recargo)
+  if(recargo > 0) lineas.push({
+    title: 'Costo de pago', quantity: 1, unit_price: recargo, currency_id: 'ARS'
   });
 
-  const total = subtotal + costoEnvio + recargo;
-
-  const base = {
-    type: 'online',
-    total_amount: dos(total),
-    external_reference: ref,
-    payer: {
-      email: comprador.email,
-      first_name: String(comprador.nombre || '').split(' ')[0] || undefined,
-      identification: comprador.dni
-        ? { type: 'DNI', number: String(comprador.dni) } : undefined
-    },
+  const partes = String(comprador.nombre || '').trim().split(/\s+/);
+  const preferencia = {
     items: lineas,
-    config: {
-      online: {
-        success_url: `${site}/?pago=ok&ref=${ref}`,
-        pending_url: `${site}/?pago=pendiente&ref=${ref}`,
-        failure_url: `${site}/?pago=error&ref=${ref}`,
-        auto_return: 'approved'
-      }
-    }
+    payer: {
+      name: partes[0] || undefined,
+      surname: partes.slice(1).join(' ') || undefined,
+      email,
+      identification: comprador.dni
+        ? { type: 'DNI', number: String(comprador.dni).replace(/\D/g,'') } : undefined
+    },
+    back_urls: {
+      success: `${site}/?pago=ok&ref=${ref}`,
+      pending: `${site}/?pago=pendiente&ref=${ref}`,
+      failure: `${site}/?pago=error&ref=${ref}`
+    },
+    auto_return: 'approved',
+    external_reference: ref,
+    statement_descriptor: 'OFELIA ST',
+    binary_mode: false
   };
 
-  /* Mercado Pago cambió el formato y la documentación no es clara,
-     así que probamos las variantes que acepta, en orden.          */
-  const variantes = [
-    /* 'manual' es el que Mercado Pago acepta hoy: va primero para no
-       gastar un pedido de más en cada compra. Los otros quedan de
-       respaldo por si algun dia cambian la API otra vez.           */
-    { nombre:'manual', cuerpo: { ...base, processing_mode:'manual' } },
-    { nombre:'automatic+transactions', cuerpo: { ...base, processing_mode:'automatic',
-        transactions: { payments: [ { amount: dos(total) } ] } } },
-    { nombre:'manual+transactions', cuerpo: { ...base, processing_mode:'manual',
-        transactions: { payments: [ { amount: dos(total) } ] } } },
-    { nombre:'sin-processing-mode', cuerpo: { ...base,
-        transactions: { payments: [ { amount: dos(total) } ] } } },
-  ];
-
-  const intentar = async v => {
-    const r = await fetch('https://api.mercadopago.com/v1/orders', {
+  let r, txt, d = null;
+  try{
+    r = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN,
         'Content-Type': 'application/json',
         accept: 'application/json',
-        'X-Idempotency-Key': ref + '-' + v.nombre + '-' + crypto.randomUUID()
+        'X-Idempotency-Key': ref
       },
-      body: JSON.stringify(v.cuerpo)
+      body: JSON.stringify(preferencia)
     });
-    const txt = await r.text();
-    let d = null; try { d = JSON.parse(txt); } catch (_) {}
-    return { nombre: v.nombre, ok: r.ok, status: r.status, d, txt };
-  };
-
-  const fallos = [];
-  for (const v of variantes) {
-    const res = await intentar(v);
-    if (res.ok && res.d && res.d.checkout_url) {
-      return json({ ref, url: res.d.checkout_url, variante: res.nombre });
-    }
-    fallos.push({ variante: res.nombre, status: res.status, cuerpo: res.txt.slice(0, 500) });
+    txt = await r.text();
+    try { d = JSON.parse(txt); } catch(_){}
+  }catch(e){
+    return json({ error:'mp', detalle:'no se pudo conectar con Mercado Pago' }, 502);
   }
 
-  return json({ error:'mp', detalle:'Mercado Pago rechazo la orden', fallos }, 502);
+  const url = d && (d.init_point || d.sandbox_init_point);
+  if(r.ok && url) return json({ ref, url });
+
+  return json({ error:'mp', detalle:'Mercado Pago rechazó la preferencia',
+                fallos:[{ variante:'preferences', status:r.status, cuerpo:String(txt).slice(0,600) }] }, 502);
 }

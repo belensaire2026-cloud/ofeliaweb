@@ -3187,8 +3187,13 @@ async function pagar(ev){
       metodo:'Hubo un problema técnico. Probá de nuevo.',
       json:'Hubo un problema técnico. Probá de nuevo.'
     };
+    /* Con ?admin al final de la dirección se ve el motivo exacto que
+       devolvió Mercado Pago. La clienta nunca lo ve.              */
+    let detalle = '';
+    if(MODO_ADMIN && Array.isArray(d.fallos) && d.fallos.length)
+      detalle = '\n\n' + d.fallos.map(f => `[${f.variante} · ${f.status}] ${f.cuerpo}`).join('\n\n');
     coFallo((motivos[d.error] || 'No pudimos iniciar el pago. Probá de nuevo en un minuto.')
-            + (d.error ? ` (${d.error})` : ''));
+            + (d.error ? ` (${d.error})` : '') + detalle);
   }catch(_){
     coFallo('No pudimos conectarnos. Revisá tu conexión y probá de nuevo.');
   }

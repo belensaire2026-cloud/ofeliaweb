@@ -1283,6 +1283,14 @@ const EMAIL    = 'belensaire2026@gmail.com';
    Ojo: el nombre del archivo va TODO EN MINÚSCULA (1.jpg, no 1.JPG).
    Si en la planilla cargás un link en la columna Foto, ese link
    gana sobre la carpeta.                                          */
+/* ── Piezas ocultas por un tiempo ────────────────────────────────
+   No se muestran en la web aunque tengan stock y foto. Es temporal:
+   sirve para sacar del catálogo una línea entera mientras se arma
+   el nuevo posicionamiento, sin borrar nada. Para volver a
+   mostrarlas, sacalas de esta lista.                              */
+const OCULTAS = new Set([
+]);
+
 /* ── Piezas que no se reponen ─────────────────────────────────────
    Son las del proveedor Docha, al que Sintia no le vuelve a comprar
    por ahora. Mientras les quede stock se muestran normalmente; en
@@ -1361,6 +1369,9 @@ const CON_FOTO = new Set([
   'argollitas-classic-n-5-plata-925',
   'anillo-corazon-i-acero-inoxidable',
   'anillo-corazon-ii-plateado-acero-inoxidable',
+  'anillo-corazon-ii-dorado-acero-dorado',
+  'anillo-nodo-dorado-acero-dorado',
+  'anillo-samantha-acero-dorado',
   'anillo-deriva-plata-925',
   'anillo-irregular-acero-inoxidable',
   'anillo-mina-acero-inoxidable',
@@ -1786,6 +1797,7 @@ function soloConFoto(list){
 
 /* Las piezas sin reposición se caen del catálogo al quedar en cero. */
 function seSigueVendiendo(p){
+  if(OCULTAS.has(p.id)) return false;
   return p.stock > 0 || !SIN_REPOSICION.has(p.id);
 }
 

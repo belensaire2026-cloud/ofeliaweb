@@ -996,7 +996,18 @@
   .co-res-sep{height:1px; background:var(--line); margin:12px 0;}
   .co-res-row.co-desc span{color:#2f6b4f;}
   .co-cupon{margin:4px 0 2px;}
-  .co-cupon-campo{display:flex; gap:8px;}
+  .co-cupon-toggle{
+    width:100%; display:flex; align-items:center; gap:10px;
+    background:none; border:none; cursor:pointer; padding:4px 0;
+    font-family:inherit; font-size:.92rem; color:var(--choco); text-align:left;}
+  .co-cupon-toggle .co-cupon-ico{
+    width:16px; height:16px; flex:none; stroke:var(--choco-soft);
+    fill:none; stroke-width:1.5;}
+  .co-cupon-toggle .co-cupon-mas{
+    margin-left:auto; font-size:1.25rem; line-height:1; color:var(--choco-soft);
+    transition:transform .2s;}
+  .co-cupon-toggle[aria-expanded="true"] .co-cupon-mas{transform:rotate(45deg);}
+  .co-cupon-campo{display:flex; gap:8px; margin-top:10px;}
   .co-cupon-campo input{
     flex:1; min-width:0; font-family:inherit; font-size:.92rem; color:var(--choco);
     background:var(--crema-pale); border:1px solid var(--line); border-radius:3px;
@@ -1035,7 +1046,9 @@
   @media(max-width:820px){
     .co-grid{grid-template-columns:1fr; gap:26px;}
     .co-fila{grid-template-columns:1fr;}
-    .co-resumen{position:static;}
+    /* El desglose del precio va arriba y el botón de pagar queda al final,
+       debajo del total. En escritorio siguen uno al lado del otro. */
+    .co-resumen{position:static; order:-1;}
   }
 </style>
 </head>
@@ -3031,7 +3044,23 @@ function quitarCupon(){
   pintarResumen();
 }
 
+function toggleCupon(){
+  const campo = document.getElementById('coCuponCampo');
+  const tog   = document.getElementById('coCuponToggle');
+  const abrir = campo.classList.contains('co-oculto');
+  campo.classList.toggle('co-oculto', !abrir);
+  tog.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  if(abrir) document.getElementById('coCuponInput').focus();
+  else document.getElementById('coCuponMsg').className = 'co-cupon-msg';
+}
+
+function cerrarCampoCupon(){
+  document.getElementById('coCuponCampo').classList.add('co-oculto');
+  document.getElementById('coCuponToggle').setAttribute('aria-expanded','false');
+}
+
 function pintarCupon(){
+  if(coCupon) cerrarCampoCupon();
   document.getElementById('coCuponCaja').classList.toggle('co-oculto', !!coCupon);
   document.getElementById('coCuponPuesto').classList.toggle('co-oculto', !coCupon);
   if(coCupon)
@@ -3452,8 +3481,17 @@ cargar();
         <div id="coLineas"></div>
         <div class="co-res-sep"></div>
         <div class="co-cupon" id="coCuponCaja">
-          <div class="co-cupon-campo">
-            <input type="text" id="coCuponInput" placeholder="Código de descuento"
+          <button type="button" class="co-cupon-toggle" id="coCuponToggle"
+                  aria-expanded="false" aria-controls="coCuponCampo" onclick="toggleCupon()">
+            <svg class="co-cupon-ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H4.2A1.2 1.2 0 0 0 3 4.4v5.4c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/>
+              <circle cx="7.5" cy="7.5" r="1.2"/>
+            </svg>
+            <span>Cupón de descuento</span>
+            <span class="co-cupon-mas">+</span>
+          </button>
+          <div class="co-cupon-campo co-oculto" id="coCuponCampo">
+            <input type="text" id="coCuponInput" placeholder="Escribí tu código"
                    autocomplete="off" spellcheck="false"
                    onkeydown="if(event.key==='Enter'){event.preventDefault();aplicarCupon();}">
             <button type="button" onclick="aplicarCupon()">Aplicar</button>

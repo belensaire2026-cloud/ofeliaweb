@@ -16,6 +16,27 @@
    RECARGO_TARJETA de index.html o el total no coincide. */
 const RECARGO_TARJETA = 0;
 
+/* ── Cupones de descuento ─────────────────────────────────────
+   Tienen que ser IGUALES a los de index.html. El navegador los usa
+   para mostrar el total; acá se vuelven a validar, porque el precio
+   que llega del navegador no se cree nunca.
+   pct: porcentaje de descuento. vence: último día válido (inclusive).
+   El descuento se aplica solo a las piezas, no al envío.         */
+const CUPONES = {
+  WARMI10: { pct: 10, vence: '2026-12-31' }
+};
+
+function cuponValido(codigo){
+  const c = String(codigo || '').trim().toUpperCase();
+  const cup = CUPONES[c];
+  if(!cup) return null;
+  if(cup.vence){
+    const hoy = new Date().toISOString().slice(0,10);
+    if(hoy > cup.vence) return null;
+  }
+  return { codigo: c, pct: cup.pct };
+}
+
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=158291260&single=true&output=csv';
 
 const json = (o, s=200) => new Response(JSON.stringify(o), {
@@ -73,7 +94,7 @@ export async function crearPago(request, env){
 
   let body;
   try { body = await request.json(); } catch(_){ return json({ error:'json' }, 400); }
-  const { items = [], envio = {}, comprador = {} } = body;
+  const { items = [], envio = {}, comprador = {}, cupon = null } = body;
 
   if(!Array.isArray(items) || !items.length) return json({ error:'carrito_vacio' }, 400);
   if(!comprador.email || !comprador.nombre)   return json({ error:'faltan_datos' }, 400);
@@ -114,6 +135,16 @@ export async function crearPago(request, env){
 
   const costoEnvio = Math.max(0, Math.round(Number(envio.precio) || 0));
 
+  /* Cupón: se revalida acá. Si el navegador manda uno vencido o
+     inventado, se ignora en silencio y se cobra el precio lleno.
+     Mercado Pago no acepta renglones negativos, así que el descuento
+     se aplica bajando el precio unitario de cada pieza.          */
+  const cup = cuponValido(cupon);
+  if(cup){
+    for(const i of mpItems)
+      i.unit_price = Math.max(1, Math.round(i.unit_price * (100 - cup.pct) / 100));
+  }
+
   /* El recargo se recalcula acá; no se confía en el navegador. */
   const subtotal = mpItems.reduce((a, i) => a + i.unit_price * i.quantity, 0);
   const recargo  = Math.round((subtotal + costoEnvio) * RECARGO_TARJETA);
@@ -127,7 +158,7 @@ export async function crearPago(request, env){
      pago con redirección, por eso no la usamos.                  */
   const lineas = mpItems.map(i => ({
     id: i.id,
-    title: i.title,
+    title: i.title + (cup ? ` (-${cup.pct}% ${cup.codigo})` : ''),
     description: i.description || undefined,
     quantity: i.quantity,
     unit_price: i.unit_price,
@@ -180,7 +211,7 @@ export async function crearPago(request, env){
   }
 
   const url = d && (d.init_point || d.sandbox_init_point);
-  if(r.ok && url) return json({ ref, url });
+  if(r.ok && url) return json({ ref, url, cupon: cup ? cup.codigo : null });
 
   return json({ error:'mp', detalle:'Mercado Pago rechazó la preferencia',
                 fallos:[{ variante:'preferences', status:r.status, cuerpo:String(txt).slice(0,600) }] }, 502);

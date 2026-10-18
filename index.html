@@ -994,6 +994,32 @@
   .co-res-row{display:flex; justify-content:space-between; gap:14px; font-size:.92rem; padding:7px 0;}
   .co-res-row small{display:block; opacity:.6; font-size:.76rem;}
   .co-res-sep{height:1px; background:var(--line); margin:12px 0;}
+  .co-res-row.co-desc span{color:#2f6b4f;}
+  .co-cupon{margin:4px 0 2px;}
+  .co-cupon-campo{display:flex; gap:8px;}
+  .co-cupon-campo input{
+    flex:1; min-width:0; font-family:inherit; font-size:.92rem; color:var(--choco);
+    background:var(--crema-pale); border:1px solid var(--line); border-radius:3px;
+    padding:10px 12px; outline:none; text-transform:uppercase; letter-spacing:.08em;
+    transition:border-color .2s;}
+  .co-cupon-campo input:focus{border-color:var(--choco);}
+  .co-cupon-campo button{
+    font-family:inherit; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    background:none; border:1px solid var(--line); border-radius:3px; padding:0 14px;
+    color:var(--choco); cursor:pointer; transition:border-color .2s, background .2s;}
+  .co-cupon-campo button:hover{border-color:var(--choco); background:var(--crema-light);}
+  .co-cupon-msg{font-size:.78rem; margin-top:7px; line-height:1.4; display:none;}
+  .co-cupon-msg.show{display:block;}
+  .co-cupon-msg.ok{color:#2f6b4f;}
+  .co-cupon-msg.mal{color:#8a2b22;}
+  .co-cupon-puesto{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    border:1px dashed #2f6b4f; border-radius:3px; padding:9px 12px;
+    font-size:.84rem; color:#2f6b4f; letter-spacing:.06em;}
+  .co-cupon-puesto button{
+    background:none; border:none; cursor:pointer; color:#2f6b4f;
+    font-family:inherit; font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; text-decoration:underline; padding:0;}
   .co-res-total{display:flex; justify-content:space-between; font-size:1.18rem; padding-top:4px;}
   .co-aviso{font-size:.8rem; opacity:.7; margin-top:10px; line-height:1.45;}
   .co-datos{border:1px solid var(--line); border-radius:4px; background:var(--crema-pale); padding:16px 18px; margin-top:4px;}
@@ -2942,6 +2968,17 @@ const TRANSFERENCIA = {
   banco:   'Mercado Pago'
 };
 
+/* ── Cupones de descuento ─────────────────────────────────────
+   Tienen que ser IGUALES a los de src/checkout.js, que es donde se
+   validan de verdad antes de cobrar. Acá solo sirven para mostrar
+   el total. pct: porcentaje. vence: último día válido, inclusive.
+   El descuento se aplica a las piezas, nunca al envío.          */
+const CUPONES = {
+  WARMI10: { pct: 10, vence: '2026-12-31' }
+};
+
+let coCupon = null;           // {codigo, pct} o null
+
 let coMedio   = 'mp';         // mp | transferencia
 let coEntrega = 'retiro';     // retiro | domicilio | sucursal
 let coTarifa  = null;         // {tipo, nombre, precio}
@@ -2949,10 +2986,58 @@ let coTarifas = [];
 let coCotizando = false;
 
 const subtotalCarrito = () => cart.reduce((s,x) => s + x.qty * x.price, 0);
+/* Se calcula pieza por pieza, igual que en src/checkout.js, para que
+   el total que ve la clienta sea exactamente el que cobra Mercado
+   Pago. Si se redondeara sobre el subtotal podrían diferir unos pesos. */
+const precioConCupon  = pr => coCupon
+  ? Math.max(1, Math.round(pr * (100 - coCupon.pct) / 100)) : pr;
+const descuentoCupon  = () => coCupon
+  ? subtotalCarrito() - cart.reduce((s,x) => s + x.qty * precioConCupon(x.price), 0) : 0;
 const costoEnvio      = () => coEntrega === 'retiro' ? 0 : (coTarifa ? coTarifa.precio : 0);
 const recargoTarjeta  = () => coMedio === 'mp'
-  ? Math.round((subtotalCarrito() + costoEnvio()) * RECARGO_TARJETA) : 0;
-const totalPedido     = () => subtotalCarrito() + costoEnvio() + recargoTarjeta();
+  ? Math.round((subtotalCarrito() - descuentoCupon() + costoEnvio()) * RECARGO_TARJETA) : 0;
+const totalPedido     = () =>
+  subtotalCarrito() - descuentoCupon() + costoEnvio() + recargoTarjeta();
+
+function aplicarCupon(){
+  const inp = document.getElementById('coCuponInput');
+  const msg = document.getElementById('coCuponMsg');
+  const codigo = inp.value.trim().toUpperCase();
+  msg.className = 'co-cupon-msg';
+  if(!codigo){ inp.focus(); return; }
+  const cup = CUPONES[codigo];
+  if(!cup){
+    msg.textContent = 'Ese código no existe. Fijate que esté bien escrito.';
+    msg.classList.add('show','mal');
+    return;
+  }
+  if(cup.vence && new Date().toISOString().slice(0,10) > cup.vence){
+    msg.textContent = 'Ese código ya venció.';
+    msg.classList.add('show','mal');
+    return;
+  }
+  coCupon = { codigo, pct: cup.pct };
+  inp.value = '';
+  msg.className = 'co-cupon-msg';
+  pintarCupon();
+  pintarResumen();
+  toast(`Cupón ${codigo} aplicado`);
+}
+
+function quitarCupon(){
+  coCupon = null;
+  document.getElementById('coCuponMsg').className = 'co-cupon-msg';
+  pintarCupon();
+  pintarResumen();
+}
+
+function pintarCupon(){
+  document.getElementById('coCuponCaja').classList.toggle('co-oculto', !!coCupon);
+  document.getElementById('coCuponPuesto').classList.toggle('co-oculto', !coCupon);
+  if(coCupon)
+    document.getElementById('coCuponTexto').textContent =
+      `${coCupon.codigo} · ${coCupon.pct}% de descuento`;
+}
 
 function checkout(){
   if(!cart.length){ toast('Tu carrito está vacío'); return; }
@@ -2968,6 +3053,7 @@ function abrirCheckout(){
   }
   pintarEntrega();
   pintarMediosPago();
+  pintarCupon();
   pintarResumen();
   document.getElementById('pantallaCheckout').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -3122,7 +3208,12 @@ function pintarResumen(){
       <span>${fmt(x.qty * x.price)}</span>
     </div>`).join('');
   const sub = subtotalCarrito(), env = costoEnvio(), rec = recargoTarjeta();
+  const des = descuentoCupon();
   document.getElementById('coSubtotal').textContent = fmt(sub);
+  document.getElementById('coFilaDescuento').classList.toggle('co-oculto', des <= 0);
+  document.getElementById('coDescuentoNombre').textContent =
+    coCupon ? `Descuento ${coCupon.codigo} (${coCupon.pct}%)` : 'Descuento';
+  document.getElementById('coDescuentoMonto').textContent = '\u2212' + fmt(des);
   document.getElementById('coEnvioMonto').textContent =
     coEntrega === 'retiro' ? 'Sin cargo' : (coTarifa ? fmt(env) : 'A calcular');
   document.getElementById('coFilaRecargo').classList.toggle('co-oculto', rec <= 0);
@@ -3161,6 +3252,7 @@ async function pagar(ev){
     const msg =
       `Hola Ofelia St! Hice un pedido desde la web y voy a pagar por transferencia.%0A%0A` +
       `${lineas}%0A%0A` +
+      `${coCupon ? `Cupón ${coCupon.codigo}: -${coCupon.pct}% (${fmt(descuentoCupon())})%0A` : ''}` +
       `Envío: ${entrega}${costoEnvio()?` — ${fmt(costoEnvio())}`:''}%0A` +
       `TOTAL: ${fmt(totalPedido())}%0A%0A` +
       `Mis datos: ${f.nombre.value}, ${f.telefono.value}, ${f.email.value}%0A` +
@@ -3174,6 +3266,7 @@ async function pagar(ev){
 
   const cuerpo = {
     recargo: recargoTarjeta(),
+    cupon: coCupon ? coCupon.codigo : null,
     items: cart.map(x => ({ id:x.id, qty:x.qty, talle:x.talle })),
     envio: {
       modo: coEntrega,
@@ -3239,7 +3332,7 @@ async function pagar(ev){
     error:     'El pago no se pudo completar. No te cobramos nada.'
   }[estado];
   if(!msg) return;
-  if(estado === 'ok') cart = [];
+  if(estado === 'ok'){ cart = []; coCupon = null; }
   history.replaceState({}, '', location.pathname);
   setTimeout(() => { renderCart(); toast(msg); }, 600);
 })();
@@ -3358,7 +3451,24 @@ cargar();
         <h3 class="pantalla-h3" style="margin-top:0">Tu pedido</h3>
         <div id="coLineas"></div>
         <div class="co-res-sep"></div>
+        <div class="co-cupon" id="coCuponCaja">
+          <div class="co-cupon-campo">
+            <input type="text" id="coCuponInput" placeholder="Código de descuento"
+                   autocomplete="off" spellcheck="false"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();aplicarCupon();}">
+            <button type="button" onclick="aplicarCupon()">Aplicar</button>
+          </div>
+          <div class="co-cupon-msg" id="coCuponMsg"></div>
+        </div>
+        <div class="co-cupon co-oculto" id="coCuponPuesto">
+          <div class="co-cupon-puesto">
+            <span id="coCuponTexto"></span>
+            <button type="button" onclick="quitarCupon()">Quitar</button>
+          </div>
+        </div>
+        <div class="co-res-sep"></div>
         <div class="co-res-row"><span>Subtotal</span><span id="coSubtotal">$0</span></div>
+        <div class="co-res-row co-desc co-oculto" id="coFilaDescuento"><span id="coDescuentoNombre">Descuento</span><span id="coDescuentoMonto">$0</span></div>
         <div class="co-res-row"><span>Envío</span><span id="coEnvioMonto">A calcular</span></div>
         <div class="co-res-row co-oculto" id="coFilaRecargo"><span>Costo de pago</span><span id="coRecargoMonto">$0</span></div>
         <div class="co-res-sep"></div>

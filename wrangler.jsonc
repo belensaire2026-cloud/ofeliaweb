@@ -10,5 +10,9 @@
     "binding": "ASSETS",
     // Solo /api/* pasa por el código; el resto va derecho a los archivos.
     "run_worker_first": ["/api/*"]
-  }
+  },
+  // Base donde se guardan los pedidos (panel en /api/pedidos).
+  "kv_namespaces": [
+    { "binding": "PEDIDOS", "id": "523166beb4294d6b86d70ebf64ba7a0b" }
+  ]
 }

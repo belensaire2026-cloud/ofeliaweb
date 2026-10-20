@@ -39,6 +39,8 @@ function cuponValido(codigo){
 
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=158291260&single=true&output=csv';
 
+import { guardarPedido } from './pedidos.js';
+
 const json = (o, s=200) => new Response(JSON.stringify(o), {
   status:s, headers:{ 'content-type':'application/json; charset=utf-8' }
 });
@@ -191,6 +193,15 @@ export async function crearPago(request, env){
     statement_descriptor: 'OFELIA ST',
     binary_mode: false
   };
+
+  /* Se guarda ANTES de mandarla a pagar: si la clienta cierra todo
+     o si Mercado Pago falla, la direccion no se pierde.          */
+  await guardarPedido(env, {
+    ref, medio:'mp', estado:'pendiente',
+    items: lineas.map(i => ({ id:i.id, qty:i.quantity, nombre:i.title })),
+    envio, comprador, cupon: cup ? cup.codigo : null,
+    total: subtotal + costoEnvio + recargo
+  });
 
   let r, txt, d = null;
   try{

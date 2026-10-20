@@ -2152,6 +2152,8 @@ function renderMenu(){
 }
 
 function toggleSub(btn){
+  /* Si el carrito quedo abierto detras del menu, se cierra. */
+  if(cartPanel.classList.contains('open')) cartPanel.classList.remove('open');
   const sub = btn.nextElementSibling;
   const wasOpen = sub.classList.contains('open');
   const siblingList = btn.parentElement.parentElement;
@@ -3271,6 +3273,21 @@ async function pagar(ev){
 
   /* ── Transferencia: no pasa por Mercado Pago ── */
   if(coMedio === 'transferencia'){
+    /* Se guarda el pedido primero, asi la direccion queda registrada
+       aunque despues no mande el WhatsApp.                        */
+    let refPedido = '';
+    try{
+      const g = await fetch('/api/pedido', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          medio:'transferencia', items: cuerpoPedido().items,
+          envio: cuerpoPedido().envio, comprador: cuerpoPedido().comprador,
+          cupon: coCupon ? coCupon.codigo : null, total: totalPedido()
+        })
+      });
+      refPedido = (await g.json()).ref || '';
+    }catch(_){}
+
     const lineas = cart.map(x =>
       `• ${x.qty}x ${x.name} (${x.mat}${x.talle && x.talle!=='Único' ? ` · talle ${x.talle}` : ''})`
     ).join('%0A');
@@ -3279,7 +3296,8 @@ async function pagar(ev){
         ? `Sucursal: ${f.sucursal.selectedOptions[0]?.text || '(a definir)'}`
         : `Domicilio: ${f.calle.value} ${f.numero.value}${f.piso.value?' '+f.piso.value:''}, ${f.localidad.value} (CP ${f.cp.value})`;
     const msg =
-      `Hola Ofelia St! Hice un pedido desde la web y voy a pagar por transferencia.%0A%0A` +
+      `Hola Ofelia St! Hice un pedido desde la web y voy a pagar por transferencia.%0A` +
+      (refPedido ? `Pedido ${refPedido}%0A` : '') + `%0A` +
       `${lineas}%0A%0A` +
       `${coCupon ? `Cupón ${coCupon.codigo}: -${coCupon.pct}% (${fmt(descuentoCupon())})%0A` : ''}` +
       `Envío: ${entrega}${costoEnvio()?` — ${fmt(costoEnvio())}`:''}%0A` +
@@ -3294,8 +3312,26 @@ async function pagar(ev){
   btn.disabled = true; btn.textContent = 'Preparando el pago…';
 
   const cuerpo = {
+    ...cuerpoPedido(),
     recargo: recargoTarjeta(),
-    cupon: coCupon ? coCupon.codigo : null,
+    cupon: coCupon ? coCupon.codigo : null
+  };
+
+  try{
+    const r = await fetch('/api/checkout', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cuerpo)
+    });
+    return await seguirPago(r);
+  }catch(e){
+    coFallo('No pudimos conectarnos. Fijate tu conexion y proba de nuevo.');
+    return false;
+  }
+}
+
+/* Los datos del pedido, iguales para Mercado Pago y para transferencia. */
+function cuerpoPedido(){
+  const f = document.getElementById('coForm');
+  return {
     items: cart.map(x => ({ id:x.id, qty:x.qty, talle:x.talle })),
     envio: {
       modo: coEntrega,
@@ -3316,11 +3352,11 @@ async function pagar(ev){
       dni: f.dni.value.trim()
     }
   };
+}
 
+/* Lee la respuesta de /api/checkout: manda a pagar, o explica el error. */
+async function seguirPago(r){
   try{
-    const r = await fetch('/api/checkout', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cuerpo)
-    });
     const d = await r.json();
     if(d.url){ sessionStorage.setItem('ofelia_ref', d.ref || ''); location.href = d.url; return false; }
     const motivos = {
@@ -3361,7 +3397,14 @@ async function pagar(ev){
     error:     'El pago no se pudo completar. No te cobramos nada.'
   }[estado];
   if(!msg) return;
-  if(estado === 'ok'){ cart = []; coCupon = null; }
+  if(estado === 'ok'){
+    cart = []; coCupon = null;
+    /* Avisarle al panel que este pedido ya esta pago. */
+    if(ref) fetch('/api/pedido', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ marcar:'pagado', ref })
+    }).catch(()=>{});
+  }
   history.replaceState({}, '', location.pathname);
   setTimeout(() => { renderCart(); toast(msg); }, 600);
 })();

@@ -2861,6 +2861,13 @@ function closeAll(){
   drawer.classList.remove('open');
   cartPanel.classList.remove('open');
   overlay.classList.remove('show');
+  /* La pantalla de finalizar compra tapa todo: si quedaba abierta,
+     se cierra tambien y se libera el scroll de la pagina.        */
+  const pc = document.getElementById('pantallaCheckout');
+  if(pc && pc.classList.contains('open')){
+    pc.classList.remove('open');
+    document.body.style.overflow = '';
+  }
 }
 hamburger.onclick = () => {
   const isOpen = drawer.classList.contains('open');

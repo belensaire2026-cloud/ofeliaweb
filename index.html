@@ -970,29 +970,14 @@
 
   /* ── Checkout ─────────────────────────────── */
   .co-grid{display:grid; grid-template-columns:1.25fr .85fr; gap:38px; align-items:start; margin-top:26px;}
-  .co-form{display:flex; flex-direction:column; gap:26px;}
+  .co-form{display:flex; flex-direction:column; gap:16px;}
   .co-fila{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  /* Estos tres son cajones sueltos, no entraban en el gap de arriba:
-     por eso cada titulo quedaba pegado al campo de la fila anterior. */
-  #coCamposEnvio, #coDomicilio, #coSucursal{
-    display:flex; flex-direction:column; gap:26px;}
-  .co-form label{display:flex; flex-direction:column; gap:6px; font-size:.78rem;
+  .co-form label{display:flex; flex-direction:column; gap:11px; font-size:.78rem;
     letter-spacing:.06em; color:var(--choco-soft); line-height:1.3;}
-  /* El texto y el "(opcional)" van juntos en un solo renglón. */
-  .co-form label > .et{display:block;}
-  .co-form label > .et i{font-style:normal; opacity:.55;}
   .co-form input, .co-form select{
     font-family:inherit; font-size:1rem; color:var(--choco);
     background:var(--crema-pale); border:1px solid var(--line); border-radius:3px;
     padding:11px 13px; outline:none; transition:border-color .2s;}
-  /* Flechita propia, centrada y despegada del borde. */
-  .co-form select{
-    -webkit-appearance:none; -moz-appearance:none; appearance:none;
-    padding-right:42px;
-    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23331C14' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 16px center;
-    background-size:12px 8px;}
   .co-form input:focus, .co-form select:focus{border-color:var(--choco);}
   .co-ops{display:flex; flex-direction:column; gap:10px;}
   .co-form .co-op, .co-op{display:flex; flex-direction:row; align-items:center; gap:12px; cursor:pointer; font-size:1rem; letter-spacing:0; color:var(--choco);
@@ -1396,9 +1381,6 @@ const SIN_REPOSICION = new Set([
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
-  'collar-amalfi-boho-collection',
-  'collar-chicle-rojo-boho-collection',
-  'collar-chicle-natural-boho-collection',
   'duo-collar-nazar-blanco-acero-dorado',
   'collar-lira-boho-collection',
   'collar-arena-boho-collection',
@@ -2170,8 +2152,6 @@ function renderMenu(){
 }
 
 function toggleSub(btn){
-  /* Si el carrito quedo abierto detras del menu, se cierra. */
-  if(cartPanel.classList.contains('open')) cartPanel.classList.remove('open');
   const sub = btn.nextElementSibling;
   const wasOpen = sub.classList.contains('open');
   const siblingList = btn.parentElement.parentElement;
@@ -2442,9 +2422,8 @@ function filterBy(mat, cat, desdeURL){
   const habiaPieza = !!idDeURL();
   current = {mat, cat};
   visibles = POR_TANDA;
-  closeAll(); cerrarCuidados(); cerrarTalles();
+  renderFilters(); renderGrid(); closeAll(); cerrarCuidados(); cerrarTalles();
   cerrarProducto(true);            // la dirección la arreglamos acá abajo
-  renderFilters(); renderGrid();
   if(!desdeURL){
     const h = hashDeFiltro(mat, cat);
     const destino = location.pathname + location.search + h;
@@ -2864,13 +2843,6 @@ function closeAll(){
   drawer.classList.remove('open');
   cartPanel.classList.remove('open');
   overlay.classList.remove('show');
-  /* La pantalla de finalizar compra tapa todo: si quedaba abierta,
-     se cierra tambien y se libera el scroll de la pagina.        */
-  const pc = document.getElementById('pantallaCheckout');
-  if(pc && pc.classList.contains('open')){
-    pc.classList.remove('open');
-    document.body.style.overflow = '';
-  }
 }
 hamburger.onclick = () => {
   const isOpen = drawer.classList.contains('open');
@@ -3519,7 +3491,7 @@ cargar();
             </div>
             <div class="co-fila">
               <label>Número<input name="numero" inputmode="numeric"></label>
-              <label><span class="et">Piso / depto <i>(opcional)</i></span><input name="piso"></label>
+              <label>Piso / depto <span style="opacity:.55">(opcional)</span><input name="piso"></label>
             </div>
           </div>
           <div id="coSucursal" class="co-oculto">

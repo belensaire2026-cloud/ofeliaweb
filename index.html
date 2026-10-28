@@ -400,13 +400,22 @@
   .var-tit{font-size:.8rem; letter-spacing:.04em; color:var(--choco-soft); margin-bottom:9px;}
   .var-tit b{font-weight:600; color:var(--choco);}
   .var-fotos{display:flex; flex-wrap:wrap; gap:9px;}
-  .var-th{
-    width:58px; height:58px; padding:0; cursor:pointer; position:relative;
-    border:1px solid var(--line); border-radius:3px; background-size:cover;
-    background-position:center; transition:border-color .18s;}
-  .var-th:hover{border-color:var(--choco-soft);}
-  .var-th.act{border-color:var(--choco); box-shadow:0 0 0 1px var(--choco);}
-  .var-th.off::after{
+  .var-sw{
+    width:46px; height:46px; padding:0; cursor:pointer; position:relative;
+    border:1px solid var(--line); border-radius:3px; transition:border-color .18s;
+    background:
+      radial-gradient(120% 100% at 30% 20%, rgba(255,255,255,.34), transparent 58%),
+      var(--c);}
+  .var-sw:hover{border-color:var(--choco-soft);}
+  .var-sw.act{border-color:var(--choco); box-shadow:0 0 0 1px var(--choco);}
+  .var-md{
+    min-width:46px; height:46px; padding:0 12px; cursor:pointer; position:relative;
+    font-family:inherit; font-size:.82rem; color:var(--choco-soft);
+    background:none; border:1px solid var(--line); border-radius:3px;
+    transition:border-color .18s, color .18s;}
+  .var-md:hover{border-color:var(--choco-soft);}
+  .var-md.act{border-color:var(--choco); color:var(--choco); box-shadow:0 0 0 1px var(--choco);}
+  .var-sw.off::after, .var-md.off::after{
     content:''; position:absolute; inset:0;
     background:linear-gradient(to top right, transparent calc(50% - .6px),
       var(--choco-soft) calc(50% - .6px), var(--choco-soft) calc(50% + .6px),
@@ -1944,10 +1953,16 @@ function variantesFichaHTML(p){
   return `<div class="var-bloque">
     <div class="var-tit">${esColor ? 'Color' : 'Medida'}: <b>${p.variante || ''}</b></div>
     <div class="var-fotos">
-      ${h.map(v => `<button class="var-th${v.id===p.id?' act':''}${v.stock<=0?' off':''}"
-           data-foto="${v.id}" style="background:${swatchOf(v.mat)}"
-           title="${v.variante}${v.stock<=0?' · sin stock':''}"
-           aria-label="${v.variante}" onclick="abrirProducto('${v.id}')"></button>`).join('')}
+      ${h.map(v => {
+        const c   = colorVariante(v.variante);
+        const cls = `${v.id===p.id?' act':''}${v.stock<=0?' off':''}`;
+        const t   = `${v.variante}${v.stock<=0?' · sin stock':''}`;
+        return c
+          ? `<button class="var-sw${cls}" style="--c:${c}" title="${t}"
+               aria-label="${t}" onclick="abrirProducto('${v.id}')"></button>`
+          : `<button class="var-md${cls}" title="${t}"
+               onclick="abrirProducto('${v.id}')">${v.variante}</button>`;
+      }).join('')}
     </div>
   </div>`;
 }

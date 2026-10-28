@@ -419,9 +419,12 @@
   .var-pt:hover{transform:scale(1.12);}
   .var-pt.act{box-shadow:0 0 0 2px var(--crema-pale) inset, 0 0 0 1.5px var(--choco);}
   .var-tx{
-    font-family:inherit; font-size:.68rem; letter-spacing:.06em; cursor:pointer;
-    padding:3px 8px; border-radius:99px; color:var(--choco-soft);
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:inherit; font-size:.76rem; letter-spacing:.04em; cursor:pointer;
+    padding:5px 11px; border-radius:99px; color:var(--choco-soft);
     background:none; border:1px solid var(--line); transition:border-color .15s, color .15s;}
+  .var-tx i{width:9px; height:9px; border-radius:50%; background:var(--c);
+    border:1px solid rgba(51,28,20,.25); flex:none;}
   .var-tx:hover{border-color:var(--choco-soft);}
   .var-tx.act{border-color:var(--choco); color:var(--choco);}
   .var-pt.off, .var-tx.off{opacity:.38;}
@@ -1410,6 +1413,8 @@ const SIN_REPOSICION = new Set([
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
+  'aros-cuore-rojo-acero-dorado',
+  'aros-mera-12mm-plata-925',
   'aros-capri-verde-acero-dorado',
   'aros-cuore-gold-acero-dorado',
   'collar-amalfi-boho-collection',
@@ -1918,18 +1923,15 @@ function variantesHTML(p, destino){
   const h = hermanos(p);
   if(h.length < 2) return '';
   return `<div class="vars">` + h.map(v => {
-    const col = colorVariante(v.variante);
     const act = v.id === p.id ? ' act' : '';
     const off = v.stock <= 0 ? ' off' : '';
     const accion = destino === 'lb'
       ? `abrirProducto('${v.id}')`
       : `verVariante('${v.id}', event)`;
     const titulo = `${v.variante}${v.stock<=0?' · sin stock':''}`;
-    return col
-      ? `<button class="var-pt${act}${off}" style="--c:${col}" title="${titulo}"
-           aria-label="${titulo}" onclick="${accion}"></button>`
-      : `<button class="var-tx${act}${off}" title="${titulo}"
-           onclick="${accion}">${v.variante}</button>`;
+    const col = colorVariante(v.variante);
+    return `<button class="var-tx${act}${off}" title="${titulo}" onclick="${accion}">`
+      + (col ? `<i style="--c:${col}"></i>` : '') + `${v.variante}</button>`;
   }).join('') + `</div>`;
 }
 

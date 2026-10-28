@@ -396,6 +396,21 @@
     letter-spacing:.18em; text-transform:uppercase;
   }
   .badge.last{background:var(--crema-pale); color:var(--choco); border:1px solid var(--choco);}
+  .var-bloque{margin:16px 0 4px;}
+  .var-tit{font-size:.8rem; letter-spacing:.04em; color:var(--choco-soft); margin-bottom:9px;}
+  .var-tit b{font-weight:600; color:var(--choco);}
+  .var-fotos{display:flex; flex-wrap:wrap; gap:9px;}
+  .var-th{
+    width:58px; height:58px; padding:0; cursor:pointer; position:relative;
+    border:1px solid var(--line); border-radius:3px; background-size:cover;
+    background-position:center; transition:border-color .18s;}
+  .var-th:hover{border-color:var(--choco-soft);}
+  .var-th.act{border-color:var(--choco); box-shadow:0 0 0 1px var(--choco);}
+  .var-th.off::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(to top right, transparent calc(50% - .6px),
+      var(--choco-soft) calc(50% - .6px), var(--choco-soft) calc(50% + .6px),
+      transparent calc(50% + .6px)); opacity:.75;}
   .vars{display:flex; flex-wrap:wrap; gap:7px; margin:9px 0 2px;}
   .var-pt{
     width:17px; height:17px; padding:0; border-radius:50%; cursor:pointer;
@@ -1918,6 +1933,23 @@ function variantesHTML(p, destino){
   }).join('') + `</div>`;
 }
 
+/* En la ficha las variantes van como miniaturas, que para una piedra
+   veteada dicen mucho más que un puntito de color plano. */
+function variantesFichaHTML(p){
+  const h = hermanos(p);
+  if(h.length < 2) return '';
+  const esColor = h.some(v => colorVariante(v.variante));
+  return `<div class="var-bloque">
+    <div class="var-tit">${esColor ? 'Color' : 'Medida'}: <b>${p.variante || ''}</b></div>
+    <div class="var-fotos">
+      ${h.map(v => `<button class="var-th${v.id===p.id?' act':''}${v.stock<=0?' off':''}"
+           data-foto="${v.id}" style="background:${swatchOf(v.mat)}"
+           title="${v.variante}${v.stock<=0?' · sin stock':''}"
+           aria-label="${v.variante}" onclick="abrirProducto('${v.id}')"></button>`).join('')}
+    </div>
+  </div>`;
+}
+
 /* Cambia la variante sin salir de la grilla: se redibuja la tarjeta. */
 function verVariante(id, ev){
   ev.stopPropagation();
@@ -2668,7 +2700,7 @@ function lbInfoHTML(p){
     <div class="material">${p.mat}</div>
     ${NOTAS[p.id] ? `<div class="nota">${NOTAS[p.id]}</div>` : ''}
     ${talles(p)}
-    ${variantesHTML(p, 'lb')}
+    ${variantesFichaHTML(p)}
     <div class="lb-precio">${fmt(p.price)}</div>
     ${estado ? `<div class="lb-stock">${estado}</div>` : ''}
     ${agotado ? botonEncargo(p) : selectorTalle(p)}

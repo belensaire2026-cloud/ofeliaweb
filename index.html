@@ -396,6 +396,20 @@
     letter-spacing:.18em; text-transform:uppercase;
   }
   .badge.last{background:var(--crema-pale); color:var(--choco); border:1px solid var(--choco);}
+  .vars{display:flex; flex-wrap:wrap; gap:7px; margin:9px 0 2px;}
+  .var-pt{
+    width:17px; height:17px; padding:0; border-radius:50%; cursor:pointer;
+    background:var(--c); border:1px solid rgba(51,28,20,.28);
+    box-shadow:0 0 0 2px var(--crema-pale) inset; transition:transform .15s, box-shadow .15s;}
+  .var-pt:hover{transform:scale(1.12);}
+  .var-pt.act{box-shadow:0 0 0 2px var(--crema-pale) inset, 0 0 0 1.5px var(--choco);}
+  .var-tx{
+    font-family:inherit; font-size:.68rem; letter-spacing:.06em; cursor:pointer;
+    padding:3px 8px; border-radius:99px; color:var(--choco-soft);
+    background:none; border:1px solid var(--line); transition:border-color .15s, color .15s;}
+  .var-tx:hover{border-color:var(--choco-soft);}
+  .var-tx.act{border-color:var(--choco); color:var(--choco);}
+  .var-pt.off, .var-tx.off{opacity:.38;}
   .sizes{font-size:.72rem; color:var(--choco-soft); letter-spacing:.04em;}
   .sizes b{font-weight:500; color:var(--choco);}
   .add-btn:disabled{
@@ -1290,7 +1304,7 @@
 
 // Link CSV de la hoja "Web" de tu planilla de Google.
 // Archivo → Compartir → Publicar en la web → hoja "Web" → formato CSV.
-const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=158291260&single=true&output=csv';
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=1066718917&single=true&output=csv';
 
 const WHATSAPP = '5491162441206';       // 54 + 9 + número sin 0 ni 15
 const EMAIL    = 'belensaire2026@gmail.com';
@@ -1381,6 +1395,7 @@ const SIN_REPOSICION = new Set([
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
+  'aros-capri-verde-acero-dorado',
   'aros-cuore-gold-acero-dorado',
   'collar-amalfi-boho-collection',
   'collar-chicle-rojo-boho-collection',
@@ -1789,7 +1804,8 @@ function rowsToProducts(rows){
   const iN=col(/^producto/), iM=col(/^material/), iC=col(/^categor/),
         iP=col(/^precio/),   iS=col(/^stock/),    iCh=col(/^chico/),
         iMe=col(/^mediano/), iG=col(/^grande/),   iD=col(/^destacado/), iF=col(/^foto/),
-        iV=col(/^vendidas/);          // opcional: habilita "Más vendidos"
+        iV=col(/^vendidas/),          // opcional: habilita "Más vendidos"
+        iFa=col(/^familia/), iVa=col(/^variante/);
   const out=[];
   for(let r=hi+1; r<rows.length; r++){
     const x=rows[r];
@@ -1806,6 +1822,8 @@ function rowsToProducts(rows){
       foto: iF<0 ? '' : (x[iF]||'').trim(),
       fila: out.length,                       // orden en la planilla = antigüedad
       vendidas: iV<0 ? null : num(x[iV]),
+      fam:      iFa<0 ? '' : (x[iFa]||'').trim(),
+      variante: iVa<0 ? '' : (x[iVa]||'').trim(),
     });
   }
   return out;
@@ -1861,6 +1879,54 @@ function seSigueVendiendo(p){
    por el material. Cualquier otro color (vino, rosa, verde…) sí se
    muestra, porque conviven en el mismo material.                  */
 const VARIANTE_MUDA = /\s+(dorad[oa]s?|platead[oa]s?)$/i;
+
+/* ── Variantes ───────────────────────────────────────────────
+   Las piezas que comparten la columna Familia de la planilla se
+   muestran juntas en una sola tarjeta. Si la variante tiene color
+   conocido se dibuja un puntito; si es una medida, va el texto. */
+const COLOR_VARIANTE = {
+  'vino':'#7b2233', 'rojo':'#b4262a', 'rosa':'#e3a7a9',
+  'verde':'#2f6b4f', 'blanco':'#f4efe7', 'natural':'#e6dccb',
+  'marron':'#6b4a33', 'marrón':'#6b4a33', 'negro':'#2b2b2b',
+  'dorado':'#c9a24a', 'gold':'#c9a24a', 'plateado':'#c6cacd',
+  'opaco':'#3a3a3a', 'brillante':'#15151a', 'turquesa':'#3f9a9a',
+  'celeste':'#9fc3d6', 'azul':'#2f4a7a'
+};
+const colorVariante = v =>
+  COLOR_VARIANTE[String(v||'').trim().toLowerCase()] || null;
+
+const hermanos = p => !p.fam ? []
+  : PRODUCTS.filter(x => x.fam === p.fam);
+
+/* Fila de variantes. 'destino' dice qué pasa al tocar una. */
+function variantesHTML(p, destino){
+  const h = hermanos(p);
+  if(h.length < 2) return '';
+  return `<div class="vars">` + h.map(v => {
+    const col = colorVariante(v.variante);
+    const act = v.id === p.id ? ' act' : '';
+    const off = v.stock <= 0 ? ' off' : '';
+    const accion = destino === 'lb'
+      ? `abrirProducto('${v.id}')`
+      : `verVariante('${v.id}', event)`;
+    const titulo = `${v.variante}${v.stock<=0?' · sin stock':''}`;
+    return col
+      ? `<button class="var-pt${act}${off}" style="--c:${col}" title="${titulo}"
+           aria-label="${titulo}" onclick="${accion}"></button>`
+      : `<button class="var-tx${act}${off}" title="${titulo}"
+           onclick="${accion}">${v.variante}</button>`;
+  }).join('') + `</div>`;
+}
+
+/* Cambia la variante sin salir de la grilla: se redibuja la tarjeta. */
+function verVariante(id, ev){
+  ev.stopPropagation();
+  const p = PRODUCTS.find(x => x.id === id);
+  const art = ev.target.closest('.card');
+  if(!p || !art) return;
+  art.outerHTML = cardHTML(p);
+  pintarMedios();
+}
 
 function normalizar(list){
   const base = unificar(list.map((p,i) => ({
@@ -2273,6 +2339,7 @@ function cardHTML(p){
       <h3 onclick="abrirProducto('${p.id}')">${p.name}</h3>
       <div class="material">${p.mat}</div>
       ${talles(p)}
+      ${variantesHTML(p, 'card')}
       <div class="price">${fmt(p.price)}</div>
       <button class="add-btn" onclick="abrirProducto('${p.id}')">Ver producto</button>
     </div>
@@ -2397,8 +2464,19 @@ function renderGrid(){
   document.getElementById('prodEyebrow').textContent =
     current.mat === 'all' ? 'Colección' : (current.cat === 'all' ? 'Material' : catLabel(current.cat));
 
+  /* Las piezas que comparten Familia entran en una sola tarjeta.
+     Se queda la primera del orden ya aplicado, que es la que tiene
+     stock; el conteo de arriba sigue contando todas.            */
+  const totalPiezas = list.length;
+  const vistas = new Set();
+  list = list.filter(p => {
+    if(!p.fam) return true;
+    if(vistas.has(p.fam)) return false;
+    vistas.add(p.fam); return true;
+  });
+
   document.getElementById('filterNote').textContent =
-    `${list.length} ${list.length===1?'accesorio':'accesorios'}`;
+    `${totalPiezas} ${totalPiezas===1?'accesorio':'accesorios'}`;
 
   /* En listados largos se muestran las primeras POR_TANDA y el resto
      aparece al tocar "Ver más". La portada nunca se corta.        */
@@ -2590,6 +2668,7 @@ function lbInfoHTML(p){
     <div class="material">${p.mat}</div>
     ${NOTAS[p.id] ? `<div class="nota">${NOTAS[p.id]}</div>` : ''}
     ${talles(p)}
+    ${variantesHTML(p, 'lb')}
     <div class="lb-precio">${fmt(p.price)}</div>
     ${estado ? `<div class="lb-stock">${estado}</div>` : ''}
     ${agotado ? botonEncargo(p) : selectorTalle(p)}

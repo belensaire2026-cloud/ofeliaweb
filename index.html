@@ -653,6 +653,19 @@
   .lb-info .nota{color:var(--crema); opacity:.72; margin-top:10px; font-size:.8rem;}
   .lb-info .sizes{color:var(--crema); opacity:.8; margin-top:12px; font-size:.78rem;}
   .lb-info .sizes b{color:var(--crema);}
+  /* Dentro de la ficha el fondo es chocolate: el texto va en crema. */
+  .lb-info .var-tit{color:var(--crema); opacity:.72;}
+  .lb-info .var-tit b{color:var(--crema); opacity:1;}
+  .lb-info .var-sw, .lb-info .var-md{border-color:rgba(227,205,189,.3);}
+  .lb-info .var-sw:hover, .lb-info .var-md:hover{border-color:rgba(227,205,189,.6);}
+  .lb-info .var-sw.act, .lb-info .var-md.act{
+    border-color:var(--crema); box-shadow:0 0 0 1px var(--crema);}
+  .lb-info .var-md{color:var(--crema); opacity:.78;}
+  .lb-info .var-md.act{color:var(--crema); opacity:1;}
+  .lb-info .var-sw.off::after, .lb-info .var-md.off::after{
+    background:linear-gradient(to top right, transparent calc(50% - .6px),
+      var(--crema) calc(50% - .6px), var(--crema) calc(50% + .6px),
+      transparent calc(50% + .6px));}
   .lb-precio{font-size:1.3rem; margin:20px 0 5px;}
   .lb-stock{
     font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;

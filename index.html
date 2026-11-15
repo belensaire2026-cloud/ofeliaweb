@@ -3137,8 +3137,14 @@ const TRANSFERENCIA = {
    el total. pct: porcentaje. vence: último día válido, inclusive.
    El descuento se aplica a las piezas, nunca al envío.          */
 const CUPONES = {
-  WARMI10: { pct: 10, vence: '2026-12-31' }
+  WARMI10: { pct: 10, vence: '2026-12-31' },
+  CYBER15: { pct: 15, vence: '2026-11-04' }
 };
+
+/* La fecha se mide en hora argentina (UTC-3). Si se usara UTC a secas,
+   un cupón que vence el 4 dejaría de andar a las 21:00 del 4 acá.      */
+const hoyAR = () =>
+  new Date(Date.now() - 3*60*60*1000).toISOString().slice(0,10);
 
 let coCupon = null;           // {codigo, pct} o null
 
@@ -3174,7 +3180,7 @@ function aplicarCupon(){
     msg.classList.add('show','mal');
     return;
   }
-  if(cup.vence && new Date().toISOString().slice(0,10) > cup.vence){
+  if(cup.vence && hoyAR() > cup.vence){
     msg.textContent = 'Ese código ya venció.';
     msg.classList.add('show','mal');
     return;

@@ -23,7 +23,8 @@ const RECARGO_TARJETA = 0;
    pct: porcentaje de descuento. vence: último día válido (inclusive).
    El descuento se aplica solo a las piezas, no al envío.         */
 const CUPONES = {
-  WARMI10: { pct: 10, vence: '2026-12-31' }
+  WARMI10: { pct: 10, vence: '2026-12-31' },
+  CYBER15: { pct: 15, vence: '2026-11-04' }
 };
 
 function cuponValido(codigo){
@@ -31,7 +32,9 @@ function cuponValido(codigo){
   const cup = CUPONES[c];
   if(!cup) return null;
   if(cup.vence){
-    const hoy = new Date().toISOString().slice(0,10);
+    /* Hora argentina (UTC-3): con UTC a secas el cupón del 4 se
+       cortaría a las 21:00 del 4 acá. */
+    const hoy = new Date(Date.now() - 3*60*60*1000).toISOString().slice(0,10);
     if(hoy > cup.vence) return null;
   }
   return { codigo: c, pct: cup.pct };
@@ -39,7 +42,8 @@ function cuponValido(codigo){
 
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSd6xMPGRN1S6Bu2aeRmDE4FiUGLxV5lFeIEbsA9QTqc9cjSUnxeDKwGFjFig96TiuCwXr5ZRlHaGVw/pub?gid=1066718917&single=true&output=csv';
 
-import { guardarPedido } from './pedidos.js';
+import { guardarPedido, marcarPedido } from './pedidos.js';
+import { avisarPorMail } from './avisos.js';
 
 const json = (o, s=200) => new Response(JSON.stringify(o), {
   status:s, headers:{ 'content-type':'application/json; charset=utf-8' }
@@ -189,6 +193,10 @@ export async function crearPago(request, env){
       failure: `${site}/?pago=error&ref=${ref}`
     },
     auto_return: 'approved',
+    /* Mercado Pago nos avisa acá cuando el pago cambia de estado.
+       Es el único aviso que llega siempre: el back_url depende de
+       que la compradora vuelva a la página, y muchas no vuelven. */
+    notification_url: `${site}/api/mp-webhook`,
     external_reference: ref,
     statement_descriptor: 'OFELIA ST',
     binary_mode: false
@@ -226,4 +234,56 @@ export async function crearPago(request, env){
 
   return json({ error:'mp', detalle:'Mercado Pago rechazó la preferencia',
                 fallos:[{ variante:'preferences', status:r.status, cuerpo:String(txt).slice(0,600) }] }, 502);
+}
+
+
+/* ── POST /api/mp-webhook ─────────────────────────────────────────
+   Lo llama Mercado Pago, no el navegador. Trae un id de pago; el
+   pago se vuelve a consultar con NUESTRO token, así que un aviso
+   falso no sirve de nada: si el id no es de esta cuenta, Mercado
+   Pago responde 404 y acá no pasa nada.
+
+   Siempre devuelve 200. Si contestáramos un error, Mercado Pago
+   reintentaría el mismo aviso durante días.                      */
+export async function webhookPago(request, env){
+  const ok = () => new Response('ok');
+  try{
+    const url = new URL(request.url);
+    let tipo = url.searchParams.get('type') || url.searchParams.get('topic') || '';
+    let id   = url.searchParams.get('data.id') || url.searchParams.get('id') || '';
+    if(!id){
+      try{
+        const b = await request.json();
+        id   = (b && b.data && b.data.id) || b.id || '';
+        tipo = (b && b.type) || tipo;
+      }catch(_){}
+    }
+    if(!id) return ok();
+    if(tipo && !String(tipo).includes('payment')) return ok();
+    if(!env.MP_ACCESS_TOKEN) return ok();
+
+    const r = await fetch('https://api.mercadopago.com/v1/payments/' + encodeURIComponent(id), {
+      headers: { Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN }
+    });
+    if(!r.ok) return ok();
+    const pago = await r.json();
+    const ref  = pago && pago.external_reference;
+    if(!ref) return ok();
+
+    const estado = pago.status === 'approved' ? 'pagado'
+                 : pago.status === 'rejected' ? 'rechazado'
+                 : String(pago.status || 'pendiente');
+
+    const p = await marcarPedido(env, ref, estado);
+    if(!p) return ok();
+
+    /* Mercado Pago manda varios avisos por el mismo pago. Solo se
+       avisa cuando el estado cambió de verdad, para no mandar tres
+       mails iguales por una sola venta. */
+    if(estado === 'pagado' && p.antes !== 'pagado'){
+      const site = (env.SITE_URL || url.origin).replace(/\/$/, '');
+      await avisarPorMail(env, p, site);
+    }
+    return ok();
+  }catch(_){ return ok(); }
 }

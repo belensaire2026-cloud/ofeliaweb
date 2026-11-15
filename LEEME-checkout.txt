@@ -105,3 +105,60 @@ stock de cada pieza. Si alguien intenta cambiar el precio desde la
 consola del navegador, el pago se rechaza.
 Esto significa que LA PLANILLA MANDA. Si un precio esta mal ahi,
 esta mal en el cobro.
+
+
+═══════════════════════════════════════════════════════════════
+AVISO POR MAIL CUANDO ENTRA UN PEDIDO   (agregado 15/11/2026)
+═══════════════════════════════════════════════════════════════
+
+Antes de esto, la web guardaba el pedido pero no avisaba a ningún
+lado: había que entrar a /api/pedidos a mirar. Y peor: el pedido
+quedaba en "pendiente" salvo que la compradora volviera a la página
+después de pagar, cosa que muchas no hacen.
+
+Ahora pasan dos cosas distintas:
+
+1) Mercado Pago avisa al servidor (/api/mp-webhook) cuando el pago
+   se aprueba. Eso ya no depende de que la compradora vuelva. El
+   pedido pasa a "pagado" solo.
+
+2) Entra un mail con el pedido completo: qué compró, cuánto, nombre,
+   DNI, teléfono, mail, y la sucursal de Correo elegida o la
+   dirección entera.
+
+El mail de transferencia llega apenas se arma el pedido. El de
+Mercado Pago llega cuando el pago está aprobado, y una sola vez
+aunque Mercado Pago mande el aviso varias veces.
+
+QUÉ HAY QUE CARGAR EN CLOUDFLARE
+────────────────────────────────
+
+Worker ofeliastudio → Settings → Variables and Secrets:
+
+  RESEND_API_KEY   la clave de resend.com        → como SECRET
+  AVISO_EMAIL      la casilla donde querés el aviso
+  AVISO_FROM       (opcional) remitente propio
+
+CÓMO SACAR LA CLAVE DE RESEND
+─────────────────────────────
+
+1. Entrar a resend.com y crear la cuenta gratis.
+
+   IMPORTANTE: creala con la MISMA casilla donde querés recibir los
+   avisos. Mientras no tengas dominio propio verificado, Resend solo
+   deja mandarle mails a la casilla dueña de la cuenta. Si creás la
+   cuenta con una dirección y ponés otra en AVISO_EMAIL, no llega
+   nada y no avisa por qué.
+
+2. API Keys → Create API Key → permiso de envío.
+3. Copiarla y pegarla en Cloudflare como SECRET. Se ve una sola vez.
+4. No la pegues en ningún chat ni la subas al repositorio.
+
+El plan gratis son 3.000 mails por mes, de sobra.
+
+SI FALTA ALGO
+─────────────
+
+Si no está la clave o falta AVISO_EMAIL, no se manda nada y la web
+sigue andando igual: el pedido queda guardado en KV y se ve en el
+panel. No se rompe nada, simplemente no te enterás solo.

@@ -12,6 +12,8 @@
    pedidos simplemente no se guardan.
    ═══════════════════════════════════════════════════════════════ */
 
+import { avisarPorMail } from './avisos.js';
+
 const json = (o, s = 200) => new Response(JSON.stringify(o), {
   status: s, headers: { 'content-type': 'application/json; charset=utf-8' }
 });
@@ -61,18 +63,11 @@ export async function registrarPedido(request, env){
 
   /* Marcar uno existente (por ejemplo: volvió pagado de Mercado Pago) */
   if(b.marcar && b.ref){
-    if(!env.PEDIDOS) return json({ ok:false });
-    const lista = await todos(env);
-    const p = lista.find(x => x.ref === b.ref);
-    if(!p) return json({ ok:false });
-    p.estado = String(b.marcar).slice(0, 24);
-    const { clave, ...resto } = p;
-    await env.PEDIDOS.put(clave, JSON.stringify(resto),
-      { expirationTtl: 60 * 60 * 24 * 400 });
-    return json({ ok:true });
+    const p = await marcarPedido(env, b.ref, b.marcar);
+    return json({ ok: !!p });
   }
 
-  const ref = await guardarPedido(env, {
+  const datos = {
     medio:     b.medio || 'transferencia',
     estado:    b.estado || 'pendiente',
     items:     Array.isArray(b.items) ? b.items : [],
@@ -80,8 +75,34 @@ export async function registrarPedido(request, env){
     comprador: b.comprador || {},
     cupon:     b.cupon || null,
     total:     Number(b.total) || 0
-  });
+  };
+  const ref = await guardarPedido(env, datos);
+
+  /* Aviso por mail. Es a propósito que no se espere el resultado de
+     verdad: si Resend tarda o falla, la compradora no tiene por qué
+     quedarse mirando una pantalla en blanco.                      */
+  if(ref){
+    const site = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
+    await avisarPorMail(env, { ...datos, ref }, site);
+  }
   return json({ ok: !!ref, ref });
+}
+
+/* Cambia el estado de un pedido ya guardado y devuelve el pedido
+   entero, o null si no existe. Lo usan el navegador cuando vuelve de
+   Mercado Pago y, sobre todo, el aviso que manda el propio Mercado
+   Pago, que es el único que llega siempre. */
+export async function marcarPedido(env, ref, estado){
+  if(!env.PEDIDOS) return null;
+  const lista = await todos(env);
+  const p = lista.find(x => x.ref === ref);
+  if(!p) return null;
+  const antes = p.estado;
+  p.estado = String(estado).slice(0, 24);
+  const { clave, ...resto } = p;
+  await env.PEDIDOS.put(clave, JSON.stringify(resto),
+    { expirationTtl: 60 * 60 * 24 * 400 });
+  return { ...resto, antes };
 }
 
 /* ── GET/POST /api/pedidos — panel privado ────────────────────── */

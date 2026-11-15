@@ -3,7 +3,7 @@
    Sirve la web y atiende /api/envios y /api/checkout.
    ═══════════════════════════════════════════════════════════════ */
 import { cotizar, sucursales }          from './envios.js';
-import { crearPago }                     from './checkout.js';
+import { crearPago, webhookPago }        from './checkout.js';
 import { registrarPedido, panelPedidos } from './pedidos.js';
 
 const json = (o, s = 200) => new Response(JSON.stringify(o), {
@@ -31,6 +31,10 @@ export default {
         return json({ error: 'metodo' }, 405);
       return panelPedidos(request, env);
     }
+
+    /* Aviso de Mercado Pago. Acepta POST y GET porque Mercado Pago
+       usa los dos según el tipo de notificación. */
+    if (url.pathname === '/api/mp-webhook') return webhookPago(request, env);
 
     if (url.pathname === '/api/checkout') {
       if (request.method !== 'POST') return json({ error: 'metodo' }, 405);

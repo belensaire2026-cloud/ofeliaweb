@@ -2518,7 +2518,14 @@ function renderGrid(){
   const cmp = ORDENES[orden];
   list = [...list].sort((a,b) => ((b.stock>0) - (a.stock>0)) ||
     (cmp ? cmp(a,b) : rangoMaterial(a.mat) - rangoMaterial(b.mat)));
-  if(!cmp && current.mat === 'all') list = intercalar(list);
+  /* Lo que está marcado Destacado en la planilla va primero, y en el
+     orden en que está cargado. Solo el resto se intercala por material.
+     Antes se intercalaba todo, así que marcar cinco collares no servía:
+     quedaba uno adelante y los otros repartidos cada tres lugares. */
+  if(!cmp && current.mat === 'all'){
+    const frente = list.filter(x => x.dest && x.stock > 0);
+    list = [...frente, ...intercalar(list.filter(x => !frente.includes(x)))];
+  }
 
   document.getElementById('ordenFila').style.display = '';
   document.getElementById('gridBarra').className = 'grid-barra';

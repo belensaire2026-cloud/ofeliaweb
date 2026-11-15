@@ -1427,6 +1427,21 @@ const SIN_REPOSICION = new Set([
   'argollita-duna-n-1-acero-blanco',
 ]);
 
+/* ── Las que van primero ─────────────────────────────────────────
+   Van antes que todo lo demás cuando el listado está en "Sugeridos",
+   y en el orden de esta lista. Sirve para empujar lo que querés
+   vender ahora sin depender de la planilla. Las que estén sin stock
+   se saltean solas, y detrás van las marcadas Destacado.         */
+const PRIMEROS = [
+  'collar-petroleo-boho-collection',
+  'collar-chicle-rojo-boho-collection',
+  'collar-chicle-natural-boho-collection',
+  'collar-chicle-bordo-boho-collection',
+  'collar-chicle-salvia-boho-collection',
+  'collar-amalfi-boho-collection',
+  'collar-tulum-boho-collection',
+];
+
 /* ── Qué piezas se publican ──────────────────────────────────────
    Mientras no tengas la foto de una pieza, no se muestra en la
    web: aparece recién cuando le cargás la carpeta en fotos/.
@@ -2531,7 +2546,10 @@ function renderGrid(){
      Antes se intercalaba todo, así que marcar cinco collares no servía:
      quedaba uno adelante y los otros repartidos cada tres lugares. */
   if(!cmp && current.mat === 'all'){
-    const frente = list.filter(x => x.dest && x.stock > 0);
+    const rango = x => { const i = PRIMEROS.indexOf(x.id); return i < 0 ? 9999 : i; };
+    const frente = list
+      .filter(x => x.stock > 0 && (rango(x) < 9999 || x.dest))
+      .sort((a,b) => rango(a) - rango(b));
     list = [...frente, ...intercalar(list.filter(x => !frente.includes(x)))];
   }
 

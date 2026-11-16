@@ -1455,6 +1455,10 @@ const PRIMEROS = [
    poné SOLO_CON_FOTO en false.                                   */
 const SOLO_CON_FOTO = true;
 const CON_FOTO = new Set([
+  'pulsera-resina-crema-boho-collection',
+  'pulsera-resina-marron-boho-collection',
+  'pulsera-resina-verde-boho-collection',
+  'collar-maia-boho-collection',
   'collar-terra-boho-collection',
   'anillo-resina-ovalo-crema-boho-collection',
   'anillo-resina-ovalo-negro-boho-collection',
@@ -1569,14 +1573,31 @@ const NOMBRES = {
 /* Notas cortas por pieza. Aparecen debajo del material en la ficha
    del producto, para aclarar medidas o detalles que la foto no
    muestra. La clave es el nombre de la carpeta de fotos.          */
+/* Material de una pieza puntual, cuando difiere del texto general
+   del material. Reemplaza la frase de INFO_MATERIALES dentro del
+   desplegable "Material" de la ficha. La clave es el id de la pieza.
+   Acá va DE QUÉ ESTÁ HECHA; las medidas van en NOTAS.           */
+const MATERIAL_PIEZA = {
+  'collar-chicle-rojo-boho-collection':    'bolitas de resina acrílica.',
+  'collar-chicle-natural-boho-collection': 'bolitas de resina acrílica.',
+  'collar-chicle-bordo-boho-collection':   'bolitas de resina acrílica.',
+  'collar-chicle-salvia-boho-collection':  'bolitas de resina acrílica.',
+  'collar-amalfi-boho-collection':         'bolitas de resina acrílica.',
+  'collar-marfil-boho-collection':         'bolitas de resina acrílica.',
+  'collar-tulum-boho-collection':          'discos de resina y apliques metálicos en tono dorado.',
+  'collar-petroleo-boho-collection':       'piedra volcánica.',
+  'collar-terra-boho-collection':          'cuentas de resina y apliques metálicos en tono dorado.',
+  'anillo-resina-circulo-blanco-boho-collection': 'resina.',
+  'anillo-resina-circulo-beige-boho-collection':  'resina.',
+  'anillo-resina-circulo-marron-boho-collection': 'resina.',
+  'anillo-resina-ovalo-crema-boho-collection':    'resina.',
+  'anillo-resina-ovalo-negro-boho-collection':    'resina.',
+  'pulsera-resina-crema-boho-collection':  'resina.',
+  'pulsera-resina-marron-boho-collection': 'resina.',
+  'pulsera-resina-verde-boho-collection':  'resina.',
+};
+
 const NOTAS = {
-  'collar-chicle-rojo-boho-collection':    'Bolitas de resina acrílica.',
-  'collar-chicle-natural-boho-collection': 'Bolitas de resina acrílica.',
-  'collar-chicle-bordo-boho-collection':   'Bolitas de resina acrílica.',
-  'collar-chicle-salvia-boho-collection':  'Bolitas de resina acrílica.',
-  'collar-amalfi-boho-collection':         'Bolitas de resina acrílica.',
-  'collar-marfil-boho-collection':         'Bolitas de resina acrílica.',
-  'collar-petroleo-boho-collection':       'Piedra volcánica.',
   'cubic-mini-circulo-plata-925': 'Piedra de 2 mm.',
   'cubic-circulo-5mm-plata-925':      'Piedra de 5 mm.',
   'aritos-perlas-4mm-plata-925':       'Perla de 4 mm.',
@@ -2792,7 +2813,7 @@ function lbInfoHTML(p){
       ${guiaTalles(p)}
       <button class="ac-cabeza" onclick="toggleAc(this)">Material<span class="ac-signo"></span></button>
       <div class="ac-cuerpo"><div>
-        <p><span class="ac-mat">${p.mat}</span> · ${infoDe(p.mat).material}</p>
+        <p><span class="ac-mat">${p.mat}</span> · ${MATERIAL_PIEZA[p.id] || infoDe(p.mat).material}</p>
       </div></div>
 
       <button class="ac-cabeza" onclick="toggleAc(this)">Cuidado<span class="ac-signo"></span></button>

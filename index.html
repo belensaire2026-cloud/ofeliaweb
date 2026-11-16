@@ -2258,9 +2258,12 @@ const _mirador = ('IntersectionObserver' in window)
     }, {threshold:0.25})
   : null;
 
-/* En la grilla las fotos se ven del tamaño de una estampilla, así que
-   usa la versión liviana (t1.jpg, unos 30 KB) en vez de la grande de
-   1200 px. Si una pieza no tiene su versión chica, usa la de siempre. */
+/* En la grilla la foto se ve mucho más chica que en la ficha, así que
+   usa una versión liviana (t1.jpg) en vez de la de 1200 px. Mide 760
+   de ancho y pesa unos 50 KB: las tarjetas miden hasta 340 px y en un
+   celular eso son 1000 px reales, así que con menos de 760 se ve
+   borrosa. Si una pieza no tiene su versión chica, usa la de siempre.
+   Las t1 se regeneran cada vez que se cambia la foto 1.            */
 const _chica = {};
 async function miniatura(url){
   if(_chica[url] !== undefined) return _chica[url];
